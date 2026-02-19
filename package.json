@@ -1,0 +1,12 @@
+{
+  "name": "telomere.ai",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --filter @telomere/web dev",
+    "build": "pnpm --filter @telomere/web build",
+    "preview": "pnpm --filter @telomere/web preview",
+    "tauri": "tauri",
+    "tauri:dev": "tauri dev",
+    "tauri:build": "tauri build"
+  }
+}

@@ -1,0 +1,55 @@
+<svelte:head><title>Privacy Policy — Telomere AI</title></svelte:head>
+
+<div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+  <h1 class="text-4xl font-bold mb-6">Privacy Policy</h1>
+  <p class="text-text-tertiary text-sm mb-8">Last updated: February 2026</p>
+
+  <div class="space-y-6 text-text-secondary">
+    <div class="card">
+      <h2 class="text-xl font-bold text-text-primary mb-3">The Short Version</h2>
+      <p class="text-lg text-accent-cyan font-medium">We don't collect, store, transmit, or process your genetic data. Period.</p>
+      <p class="mt-3">Telomere AI is a desktop application. All genetic data processing happens locally on your computer. Your DNA data never leaves your machine.</p>
+    </div>
+
+    <div class="card">
+      <h2 class="text-xl font-bold text-text-primary mb-3">Data Processing</h2>
+      <ul class="space-y-2 mt-3">
+        <li class="flex items-start gap-2"><span class="text-accent-green mt-0.5">✓</span> Your genetic file is read and parsed entirely in-memory on your computer</li>
+        <li class="flex items-start gap-2"><span class="text-accent-green mt-0.5">✓</span> No data is sent to any external server or API</li>
+        <li class="flex items-start gap-2"><span class="text-accent-green mt-0.5">✓</span> No data is written to disk beyond normal application operation</li>
+        <li class="flex items-start gap-2"><span class="text-accent-green mt-0.5">✓</span> When you close the application, your genetic data is gone from memory</li>
+        <li class="flex items-start gap-2"><span class="text-accent-green mt-0.5">✓</span> The application works fully offline</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2 class="text-xl font-bold text-text-primary mb-3">No Data Collection</h2>
+      <p>We do not collect:</p>
+      <ul class="space-y-1 mt-2 ml-4 list-disc">
+        <li>Genetic data or SNP information</li>
+        <li>Personal information or identifiers</li>
+        <li>Usage analytics or telemetry</li>
+        <li>IP addresses or device information</li>
+        <li>Any form of tracking or fingerprinting</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2 class="text-xl font-bold text-text-primary mb-3">Third-Party Services</h2>
+      <p>The desktop application does not connect to any third-party services by default. The only external resources loaded are Google Fonts (Inter and JetBrains Mono) when running in development mode with an internet connection.</p>
+    </div>
+
+    <div class="card">
+      <h2 class="text-xl font-bold text-text-primary mb-3">Open Source Verification</h2>
+      <p>Our entire codebase is open source. You can audit every line of code to verify our privacy claims:</p>
+      <a href="https://github.com/vaionex/telomere.ai" target="_blank" rel="noopener" class="inline-flex items-center gap-2 mt-3 text-accent-cyan hover:underline">
+        github.com/vaionex/telomere.ai →
+      </a>
+    </div>
+
+    <div class="card">
+      <h2 class="text-xl font-bold text-text-primary mb-3">Contact</h2>
+      <p>For privacy-related questions, contact us at <span class="text-accent-cyan">privacy@vaionex.com</span>.</p>
+    </div>
+  </div>
+</div>

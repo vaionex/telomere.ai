@@ -1,0 +1,30 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nickelpack/tauri2-schema/main/tauri-conf.json",
+  "productName": "Telomere AI",
+  "version": "0.1.0",
+  "identifier": "com.vaionex.telomere",
+  "build": {
+    "frontendDist": "../apps/web/build",
+    "devUrl": "http://localhost:5173",
+    "beforeDevCommand": "pnpm --filter @telomere/web dev",
+    "beforeBuildCommand": "pnpm --filter @telomere/web build"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Telomere AI",
+        "width": 1280,
+        "height": 800,
+        "minWidth": 900,
+        "minHeight": 600
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "plugins": {
+    "dialog": { "all": true },
+    "fs": { "scope": { "allow": ["**"] } }
+  }
+}

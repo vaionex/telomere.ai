@@ -1,0 +1,48 @@
+{
+	"/": [
+		"src/routes/+layout.js",
+		"src/routes/+layout.js"
+	],
+	"/about": [
+		"src/routes/+layout.js"
+	],
+	"/blog": [
+		"src/routes/+layout.js"
+	],
+	"/blog/[slug]": [
+		"src/routes/+layout.js"
+	],
+	"/dashboard": [
+		"src/routes/+layout.js"
+	],
+	"/explore": [
+		"src/routes/+layout.js"
+	],
+	"/privacy": [
+		"src/routes/+layout.js"
+	],
+	"/report/carrier": [
+		"src/routes/+layout.js"
+	],
+	"/report/health": [
+		"src/routes/+layout.js"
+	],
+	"/report/longevity": [
+		"src/routes/+layout.js"
+	],
+	"/report/nutrition": [
+		"src/routes/+layout.js"
+	],
+	"/report/pharma": [
+		"src/routes/+layout.js"
+	],
+	"/report/traits": [
+		"src/routes/+layout.js"
+	],
+	"/snp/[rsid]": [
+		"src/routes/+layout.js"
+	],
+	"/upload": [
+		"src/routes/+layout.js"
+	]
+}
