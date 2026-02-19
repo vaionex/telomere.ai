@@ -5,8 +5,8 @@
   function toggleFaq(i) { faqOpen = { ...faqOpen, [i]: !faqOpen[i] }; }
 
   const steps = [
-    { num: '01', title: 'Open File', desc: 'Select your raw genetic data file from your computer. We support 23andMe, AncestryDNA, MyHeritage, and VCF formats.', icon: '📂' },
-    { num: '02', title: 'Analyze', desc: 'Our engine parses 500,000+ SNPs and matches them against our curated database of health markers — entirely on your machine.', icon: '🧬' },
+    { num: '01', title: 'Open File', desc: 'Select your raw genetic data file. We support 23andMe, AncestryDNA, MyHeritage, VCF, and full whole-genome sequencing files (4GB+).', icon: '📂' },
+    { num: '02', title: 'Analyze', desc: 'Our Rust engine streams through millions of variants and matches them against our curated health marker database — entirely on your machine.', icon: '🧬' },
     { num: '03', title: 'Discover', desc: 'Get detailed reports on health risks, longevity, nutrition, drug response, traits, and carrier status.', icon: '🔬' }
   ];
 
@@ -22,14 +22,14 @@
   const faqs = [
     { q: 'Is this really free?', a: 'Yes, completely free. Telomere AI is open-source software built by Vaionex. We believe genetic insights should be accessible to everyone.' },
     { q: 'Is my data safe?', a: 'Absolutely. Your genetic data is processed entirely on your computer. Nothing is ever sent to any server. The app works fully offline.' },
-    { q: 'What file formats do you support?', a: '23andMe raw data (.txt), AncestryDNA (.txt), MyHeritage (.csv), and VCF 4.x files. Just download your raw data from your testing provider and open it here.' },
+    { q: 'What file formats do you support?', a: '23andMe (.txt), AncestryDNA (.txt), MyHeritage (.csv), VCF 4.x (.vcf, .vcf.gz), and full whole-genome sequencing files. We\'re one of the few tools that handles raw WGS data (4GB+) — our Rust streaming parser processes them efficiently without loading everything into memory.' },
     { q: 'How accurate are the results?', a: 'Our SNP database draws from ClinVar, SNPedia, PharmGKB, and peer-reviewed GWAS studies. Every finding includes PubMed references and population frequency data so you can evaluate the evidence yourself. We show everything — nothing is filtered or hidden.' },
     { q: 'Can I use this for medical decisions?', a: 'We show you everything. Every finding includes PubMed references and population frequency data. Unlike other tools, nothing is hidden or gated. You already have your genome file — we just make it readable so you can have informed conversations with your healthcare provider if you choose.' },
     { q: 'How does this compare to SelfDecode or Promethease?', a: 'SelfDecode costs $297/year and Promethease costs $12. We offer comparable analysis for free, with a fully offline desktop app and open-source codebase.' }
   ];
 
   const stats = [
-    { value: '500,000+', label: 'SNPs Parsed' },
+    { value: '5M+', label: 'Variants Supported' },
     { value: '2,000+', label: 'Health Markers' },
     { value: '6', label: 'Report Categories' },
     { value: '100%', label: 'Offline & Local' }
@@ -43,12 +43,15 @@
 
 <!-- Hero -->
 <section class="relative min-h-screen flex items-center overflow-hidden">
-  <div class="absolute inset-0 bg-gradient-to-b from-accent-cyan/5 via-transparent to-transparent"></div>
-  <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-accent-cyan/5 rounded-full blur-[120px]"></div>
+  <!-- Multi-color gradient blobs -->
+  <div class="absolute -top-40 -left-40 w-[700px] h-[700px] rounded-full bg-[#3B82F6] opacity-[0.20] blur-[160px] animate-blob"></div>
+  <div class="absolute top-1/3 -right-20 w-[500px] h-[500px] rounded-full bg-[#F43F5E] opacity-[0.15] blur-[140px] animate-blob animation-delay-2000"></div>
+  <div class="absolute -bottom-20 left-1/3 w-[600px] h-[600px] rounded-full bg-[#7C3AED] opacity-[0.12] blur-[150px] animate-blob animation-delay-4000"></div>
+  <div class="absolute top-20 right-1/4 w-[300px] h-[300px] rounded-full bg-[#F59E0B] opacity-[0.15] blur-[100px] animate-blob animation-delay-3000"></div>
 
   <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 flex flex-col lg:flex-row items-center gap-16">
     <div class="flex-1 text-center lg:text-left">
-      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full glass text-xs text-accent-cyan mb-6">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full glass text-xs text-accent-blue mb-6">
         <span class="w-2 h-2 rounded-full bg-accent-green animate-pulse"></span>
         100% Offline • Open Source • Free Forever
       </div>
@@ -57,13 +60,13 @@
         <span class="gradient-text">Locally. Free.</span>
       </h1>
       <p class="text-xl text-text-secondary max-w-xl mb-4 leading-relaxed">
-        Open your 23andMe, AncestryDNA, or VCF data. Get detailed health insights in seconds.
+        Open your 23andMe, AncestryDNA, VCF, or raw whole-genome data. Get detailed health insights in seconds.
       </p>
-      <p class="text-lg text-accent-cyan font-medium mb-8">
+      <p class="text-lg text-accent-blue font-medium mb-8">
         Your DNA stays on your computer. Always.
       </p>
       <div class="flex flex-col sm:flex-row items-center gap-4">
-        <a href="/download" class="btn-primary text-lg px-8 py-4 glow-cyan">
+        <a href="/download" class="btn-cta text-lg px-8 py-4">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
           Download for Free
         </a>
@@ -94,11 +97,11 @@
 </section>
 
 <!-- Trusted Formats -->
-<section class="py-12 border-y border-white/5">
+<section class="py-12 border-y border-black/5">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <p class="text-center text-text-tertiary text-sm mb-6">Supports all major genetic testing platforms</p>
     <div class="flex items-center justify-center gap-8 sm:gap-16 flex-wrap">
-      {#each ['23andMe', 'AncestryDNA', 'MyHeritage', 'VCF 4.x'] as fmt}
+      {#each ['23andMe', 'AncestryDNA', 'MyHeritage', 'VCF 4.x', 'WGS (4GB+)'] as fmt}
         <span class="text-text-secondary font-semibold text-lg opacity-60 hover:opacity-100 transition-opacity">{fmt}</span>
       {/each}
     </div>
@@ -115,9 +118,9 @@
     <div class="grid md:grid-cols-3 gap-8">
       {#each steps as step}
         <div class="card text-center group relative overflow-hidden">
-          <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-accent-cyan to-accent-blue scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></div>
+          <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-accent-blue to-accent-blue scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></div>
           <span class="text-5xl mb-4 block">{step.icon}</span>
-          <span class="text-accent-cyan font-mono text-sm">{step.num}</span>
+          <span class="text-accent-blue font-mono text-sm">{step.num}</span>
           <h3 class="text-xl font-bold mt-2 mb-3">{step.title}</h3>
           <p class="text-text-secondary text-sm">{step.desc}</p>
         </div>
@@ -127,7 +130,9 @@
 </section>
 
 <!-- Report Categories -->
-<section id="reports" class="py-24 relative">
+<section id="reports" class="py-24 relative overflow-hidden">
+  <div class="absolute top-0 right-0 w-[500px] h-[500px] rounded-full bg-[#7C3AED] opacity-[0.12] blur-[140px] animate-blob animation-delay-2000"></div>
+  <div class="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full bg-[#0EA5E9] opacity-[0.15] blur-[120px] animate-blob animation-delay-4000"></div>
   <div class="absolute inset-0 bg-gradient-to-b from-transparent via-accent-violet/3 to-transparent"></div>
   <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="text-center mb-16">
@@ -143,8 +148,8 @@
             <h3 class="text-lg font-bold mb-2">{cat.title}</h3>
             <p class="text-text-secondary text-sm mb-4">{cat.desc}</p>
             <div class="flex items-center justify-between">
-              <span class="text-accent-cyan font-mono text-sm">{cat.count} markers</span>
-              <svg class="w-4 h-4 text-text-tertiary group-hover:text-accent-cyan group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+              <span class="text-accent-blue font-mono text-sm">{cat.count} markers</span>
+              <svg class="w-4 h-4 text-text-tertiary group-hover:text-accent-blue group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
             </div>
           </div>
         </div>
@@ -161,17 +166,17 @@
       <p class="text-text-secondary max-w-2xl mx-auto mb-8">Telomere AI is a desktop application. Your genetic data never touches the internet — and every result is shown to you. No gatekeeping, no paywalls, no hidden findings.</p>
       <div class="grid sm:grid-cols-3 gap-8 text-left">
         <div>
-          <div class="w-10 h-10 rounded-lg glass flex items-center justify-center mb-3 text-accent-cyan">🖥️</div>
+          <div class="w-10 h-10 rounded-lg glass flex items-center justify-center mb-3 text-accent-blue">🖥️</div>
           <h3 class="font-semibold mb-1">Fully Offline</h3>
           <p class="text-text-secondary text-sm">Works without an internet connection. No data ever leaves your device.</p>
         </div>
         <div>
-          <div class="w-10 h-10 rounded-lg glass flex items-center justify-center mb-3 text-accent-cyan">🚫</div>
+          <div class="w-10 h-10 rounded-lg glass flex items-center justify-center mb-3 text-accent-blue">🚫</div>
           <h3 class="font-semibold mb-1">No Cloud, No Servers</h3>
           <p class="text-text-secondary text-sm">No accounts, no uploads, no tracking. Just you and your DNA data.</p>
         </div>
         <div>
-          <div class="w-10 h-10 rounded-lg glass flex items-center justify-center mb-3 text-accent-cyan">📖</div>
+          <div class="w-10 h-10 rounded-lg glass flex items-center justify-center mb-3 text-accent-blue">📖</div>
           <h3 class="font-semibold mb-1">Open Source</h3>
           <p class="text-text-secondary text-sm">Every line of code is auditable on GitHub. Verify our privacy claims yourself.</p>
         </div>
@@ -181,7 +186,9 @@
 </section>
 
 <!-- Comparison -->
-<section id="features" class="py-24 relative">
+<section id="features" class="py-24 relative overflow-hidden">
+  <div class="absolute -top-20 left-1/4 w-[600px] h-[600px] rounded-full bg-[#10B981] opacity-[0.12] blur-[150px] animate-blob"></div>
+  <div class="absolute bottom-10 right-0 w-[400px] h-[400px] rounded-full bg-[#F43F5E] opacity-[0.10] blur-[120px] animate-blob animation-delay-3000"></div>
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="text-center mb-16">
       <h2 class="text-3xl sm:text-4xl font-bold mb-4">How We Compare</h2>
@@ -194,7 +201,7 @@
             <th class="text-left py-4 px-4 text-text-secondary font-medium">Feature</th>
             <th class="text-center py-4 px-4 text-text-secondary font-medium">SelfDecode<br/><span class="text-accent-red">$297/yr</span></th>
             <th class="text-center py-4 px-4 text-text-secondary font-medium">Promethease<br/><span class="text-accent-amber">$12</span></th>
-            <th class="text-center py-4 px-4 font-medium gradient-text">Telomere AI<br/><span class="text-accent-green">Free</span></th>
+            <th class="text-center py-4 px-4 font-medium text-text-primary">Telomere<span class="text-accent-blue">.AI</span><br/><span class="text-accent-green">Free</span></th>
           </tr>
         </thead>
         <tbody>
@@ -204,13 +211,14 @@
             ['Report Quality', 'Excellent', 'Raw/Technical', 'Professional + AI'],
             ['Privacy', 'Cloud-based', 'Cloud-based', '100% Offline Desktop'],
             ['Open Source', '✗', '✗', '✓'],
-            ['All Formats', '✓', '✓', '✓']
+            ['WGS Support (4GB+)', '✗', '✗', '✓ Streaming'],
+            ['All Formats', '✓', '✓', '✓ + .vcf.gz']
           ] as row}
-            <tr class="border-b border-white/5 hover:bg-white/[0.02]">
+            <tr class="border-b border-black/5 hover:bg-white/[0.02]">
               <td class="py-3 px-4 text-text-secondary">{row[0]}</td>
               <td class="py-3 px-4 text-center">{row[1]}</td>
               <td class="py-3 px-4 text-center">{row[2]}</td>
-              <td class="py-3 px-4 text-center text-accent-cyan font-medium">{row[3]}</td>
+              <td class="py-3 px-4 text-center text-accent-blue font-medium">{row[3]}</td>
             </tr>
           {/each}
         </tbody>
@@ -220,7 +228,7 @@
 </section>
 
 <!-- Stats -->
-<section class="py-24 border-y border-white/5">
+<section class="py-24 border-y border-black/5">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
       {#each stats as stat}
@@ -261,7 +269,7 @@
     <div class="card p-12 glow-border">
       <h2 class="text-3xl sm:text-4xl font-bold mb-4">Ready to Decode Your DNA?</h2>
       <p class="text-text-secondary mb-8 max-w-xl mx-auto">Open your genetic data file and unlock comprehensive health insights. It takes less than 30 seconds.</p>
-      <a href="/download" class="btn-primary text-lg px-8 py-4 glow-cyan">
+      <a href="/download" class="btn-cta text-lg px-8 py-4">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
         Download — It's Free
       </a>

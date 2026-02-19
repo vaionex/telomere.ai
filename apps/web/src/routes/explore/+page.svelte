@@ -1,115 +1,123 @@
 <script>
-  import { getAllSnps, searchSnps, getCategories } from '@telomere/snp-db';
-  import { rawSnps, isLoaded } from '$lib/stores/genetic-data.js';
-  import { matchSnps } from '@telomere/snp-db';
-  import RiskGauge from '$lib/components/RiskGauge.svelte';
-
-  let query = $state('');
-  let selectedCategory = $state('all');
-  let selectedChromosome = $state('all');
+  import { getAllSnps, getCategories, matchSnps } from '@telomere/snp-db';
+  import { isLoaded, rawSnps } from '$lib/stores/genetic-data.js';
+  import { get } from 'svelte/store';
 
   const allSnps = getAllSnps();
-  const categories = ['all', ...getCategories()];
-  const chromosomes = ['all', ...[...new Set(allSnps.map(s => s.chromosome))].sort((a, b) => {
-    const na = parseInt(a), nb = parseInt(b);
-    if (!isNaN(na) && !isNaN(nb)) return na - nb;
-    if (!isNaN(na)) return -1;
-    if (!isNaN(nb)) return 1;
-    return a.localeCompare(b);
-  })];
+  const categories = getCategories();
 
-  const matched = $derived($isLoaded ? matchSnps($rawSnps) : []);
-  const matchedMap = $derived(new Map(matched.map(s => [s.rsid, s])));
+  let search = $state('');
+  let filterCat = $state('');
+  let hasData = $state(false);
+  let userMatches = $state(new Map());
+
+  $effect(() => {
+    hasData = get(isLoaded);
+    if (hasData) {
+      const matched = matchSnps(get(rawSnps));
+      userMatches = new Map(matched.map(m => [m.rsid, m]));
+    }
+  });
 
   const filtered = $derived(() => {
-    let results = query.length > 1 ? searchSnps(query) : allSnps;
-    if (selectedCategory !== 'all') results = results.filter(s => s.categories.includes(selectedCategory));
-    if (selectedChromosome !== 'all') results = results.filter(s => s.chromosome === selectedChromosome);
-    return results;
+    let result = allSnps;
+    if (filterCat) result = result.filter(s => s.categories?.includes(filterCat));
+    if (search) {
+      const q = search.toLowerCase();
+      result = result.filter(s =>
+        s.rsid.toLowerCase().includes(q) ||
+        s.gene?.toLowerCase().includes(q) ||
+        s.trait?.toLowerCase().includes(q) ||
+        s.conditions?.some(c => c.toLowerCase().includes(q))
+      );
+    }
+    return result;
   });
+
+  function riskColor(level) {
+    if (level === 'high') return 'text-accent-red';
+    if (level === 'moderate') return 'text-accent-amber';
+    return 'text-accent-green';
+  }
 </script>
 
-<svelte:head><title>SNP Explorer — Telomere AI</title></svelte:head>
+<svelte:head>
+  <title>SNP Explorer — Telomere.ai</title>
+</svelte:head>
 
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
-  <div class="mb-8">
-    <h1 class="text-3xl font-bold mb-2">SNP <span class="gradient-text">Explorer</span></h1>
-    <p class="text-text-secondary">Browse and search our curated database of {allSnps.length} health-relevant SNPs.</p>
+<section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-6">
+  <div>
+    <h1 class="text-2xl sm:text-3xl font-bold text-text-primary">SNP Explorer</h1>
+    <p class="text-text-secondary text-sm mt-1">Browse all {allSnps.length} curated SNPs in the database</p>
   </div>
 
-  <!-- Search & filters -->
-  <div class="flex flex-col sm:flex-row gap-4 mb-6">
+  <!-- Filters -->
+  <div class="flex flex-col sm:flex-row gap-3">
     <div class="flex-1 relative">
-      <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-tertiary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+      <svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-text-tertiary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
       <input
         type="text"
-        bind:value={query}
-        placeholder="Search by rsID, gene, or trait..."
-        class="w-full pl-10 pr-4 py-2.5 rounded-lg bg-surface border border-white/10 text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-accent-cyan/50 font-mono text-sm"
+        bind:value={search}
+        placeholder="Search by rsID, gene, or condition..."
+        class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-surface border border-black/5 text-sm text-text-primary placeholder-text-tertiary focus:outline-none focus:border-accent-blue/40 transition-colors"
       />
     </div>
-    <select bind:value={selectedCategory} class="px-4 py-2.5 rounded-lg bg-surface border border-white/10 text-text-primary text-sm focus:outline-none focus:border-accent-cyan/50">
+    <select
+      bind:value={filterCat}
+      class="px-4 py-2.5 rounded-xl bg-surface border border-black/5 text-sm text-text-primary focus:outline-none focus:border-accent-blue/40"
+    >
+      <option value="">All categories</option>
       {#each categories as cat}
-        <option value={cat}>{cat === 'all' ? 'All Categories' : cat.charAt(0).toUpperCase() + cat.slice(1)}</option>
-      {/each}
-    </select>
-    <select bind:value={selectedChromosome} class="px-4 py-2.5 rounded-lg bg-surface border border-white/10 text-text-primary text-sm focus:outline-none focus:border-accent-cyan/50">
-      {#each chromosomes as chr}
-        <option value={chr}>{chr === 'all' ? 'All Chromosomes' : `Chr ${chr}`}</option>
+        <option value={cat}>{cat.charAt(0).toUpperCase() + cat.slice(1)}</option>
       {/each}
     </select>
   </div>
 
-  <p class="text-text-tertiary text-sm mb-4">{filtered().length} SNPs</p>
+  <!-- Results count -->
+  <p class="text-xs text-text-tertiary">{filtered().length} SNP{filtered().length !== 1 ? 's' : ''}</p>
 
   <!-- Table -->
-  <div class="overflow-x-auto rounded-xl border border-white/10">
+  <div class="overflow-x-auto">
     <table class="w-full text-sm">
       <thead>
-        <tr class="bg-white/[0.03] border-b border-white/10">
-          <th class="text-left py-3 px-4 font-medium text-text-secondary">rsID</th>
-          <th class="text-left py-3 px-4 font-medium text-text-secondary">Gene</th>
-          <th class="text-left py-3 px-4 font-medium text-text-secondary hidden sm:table-cell">Chr</th>
-          <th class="text-left py-3 px-4 font-medium text-text-secondary">Trait</th>
-          {#if $isLoaded}
-            <th class="text-center py-3 px-4 font-medium text-text-secondary">Genotype</th>
-            <th class="text-center py-3 px-4 font-medium text-text-secondary">Risk</th>
+        <tr class="border-b border-black/5">
+          <th class="text-left py-3 px-3 text-text-tertiary font-medium text-xs">rsID</th>
+          <th class="text-left py-3 px-3 text-text-tertiary font-medium text-xs">Gene</th>
+          <th class="text-left py-3 px-3 text-text-tertiary font-medium text-xs hidden sm:table-cell">Category</th>
+          <th class="text-left py-3 px-3 text-text-tertiary font-medium text-xs hidden md:table-cell">Significance</th>
+          {#if hasData}
+            <th class="text-left py-3 px-3 text-text-tertiary font-medium text-xs">Genotype</th>
+            <th class="text-left py-3 px-3 text-text-tertiary font-medium text-xs">Risk</th>
           {/if}
-          <th class="text-left py-3 px-4 font-medium text-text-secondary hidden md:table-cell">Category</th>
         </tr>
       </thead>
       <tbody>
-        {#each filtered().slice(0, 100) as snp (snp.rsid)}
-          {@const m = matchedMap.get(snp.rsid)}
-          <tr class="border-b border-white/5 hover:bg-white/[0.02] cursor-pointer transition-colors" onclick={() => window.location.href = `/snp/${snp.rsid}`}>
-            <td class="py-3 px-4 font-mono text-accent-cyan text-xs">{snp.rsid}</td>
-            <td class="py-3 px-4 font-medium">{snp.gene}</td>
-            <td class="py-3 px-4 text-text-tertiary hidden sm:table-cell">{snp.chromosome}</td>
-            <td class="py-3 px-4 text-text-secondary text-xs max-w-xs truncate">{snp.trait}</td>
-            {#if $isLoaded}
-              <td class="py-3 px-4 text-center font-mono font-bold {m ? 'text-accent-cyan' : 'text-text-tertiary'}">{m?.userGenotype || '—'}</td>
-              <td class="py-3 px-4 text-center">
-                {#if m}
-                  <span class="px-2 py-0.5 rounded-full text-xs {m.riskLevel === 'high' ? 'bg-accent-red/10 text-accent-red' : m.riskLevel === 'moderate' ? 'bg-accent-amber/10 text-accent-amber' : 'bg-accent-green/10 text-accent-green'}">{m.riskLevel}</span>
+        {#each filtered() as snp (snp.rsid)}
+          {@const userMatch = userMatches.get(snp.rsid)}
+          <tr class="border-b border-black/[0.03] hover:bg-accent-blue/[0.02] transition-colors">
+            <td class="py-3 px-3">
+              <a href="/snp/{snp.rsid}" class="font-mono text-accent-blue hover:underline">{snp.rsid}</a>
+            </td>
+            <td class="py-3 px-3 text-text-secondary">{snp.gene}</td>
+            <td class="py-3 px-3 text-text-tertiary text-xs hidden sm:table-cell">
+              {#each snp.categories || [] as cat}
+                <span class="inline-block px-2 py-0.5 rounded-full glass text-xs mr-1">{cat}</span>
+              {/each}
+            </td>
+            <td class="py-3 px-3 text-text-tertiary text-xs hidden md:table-cell">{snp.significance || '—'}</td>
+            {#if hasData}
+              <td class="py-3 px-3 font-mono text-sm">{userMatch?.userGenotype || '—'}</td>
+              <td class="py-3 px-3">
+                {#if userMatch}
+                  <span class="text-xs font-medium {riskColor(userMatch.riskLevel)}">{userMatch.riskLevel}</span>
                 {:else}
-                  <span class="text-text-tertiary">—</span>
+                  <span class="text-text-tertiary text-xs">—</span>
                 {/if}
               </td>
             {/if}
-            <td class="py-3 px-4 hidden md:table-cell">
-              <div class="flex gap-1 flex-wrap">
-                {#each snp.categories as cat}
-                  <span class="px-2 py-0.5 rounded-full text-xs glass text-text-tertiary">{cat}</span>
-                {/each}
-              </div>
-            </td>
           </tr>
         {/each}
       </tbody>
     </table>
   </div>
-
-  {#if filtered().length > 100}
-    <p class="text-text-tertiary text-sm text-center mt-4">Showing first 100 of {filtered().length} results. Refine your search to see more.</p>
-  {/if}
-</div>
+</section>

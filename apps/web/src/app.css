@@ -1,31 +1,32 @@
 @import 'tailwindcss';
 
 @theme {
-  --color-bg-primary: #0A0E17;
-  --color-bg-secondary: #111827;
-  --color-bg-tertiary: #1A2235;
-  --color-surface: #0F1629;
-  --color-text-primary: #F0F4F8;
-  --color-text-secondary: #8B95A5;
-  --color-text-tertiary: #4A5568;
-  --color-accent-cyan: #00E5CC;
+  --color-bg-primary: #FAFBFD;
+  --color-bg-secondary: #F0F2F7;
+  --color-bg-tertiary: #E8ECF3;
+  --color-surface: #FFFFFF;
+  --color-text-primary: #0F172A;
+  --color-text-secondary: #475569;
+  --color-text-tertiary: #94A3B8;
+  --color-accent-cyan: #0EA5E9;
   --color-accent-blue: #3B82F6;
-  --color-accent-violet: #8B5CF6;
+  --color-accent-violet: #7C3AED;
   --color-accent-amber: #F59E0B;
   --color-accent-red: #EF4444;
   --color-accent-green: #10B981;
+  --color-accent-rose: #F43F5E;
   --font-sans: 'Inter', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 }
 
 * {
   scrollbar-width: thin;
-  scrollbar-color: #1A2235 transparent;
+  scrollbar-color: #CBD5E1 transparent;
 }
 
 ::selection {
-  background: rgba(0, 229, 204, 0.3);
-  color: #F0F4F8;
+  background: rgba(59, 130, 246, 0.2);
+  color: #0F172A;
 }
 
 body {
@@ -35,55 +36,100 @@ body {
   line-height: 1.7;
 }
 
+/* Acrylic glass — background color bleeds through */
 .glass {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.7);
 }
 
 .glow-cyan {
-  box-shadow: 0 0 40px rgba(0, 229, 204, 0.15), 0 0 80px rgba(0, 229, 204, 0.05);
+  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.25), 0 0 60px rgba(59, 130, 246, 0.08);
 }
 
 .glow-border {
-  border: 1px solid rgba(0, 229, 204, 0.3);
-  box-shadow: 0 0 20px rgba(0, 229, 204, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.08);
 }
 
 .gradient-text {
-  background: linear-gradient(135deg, #00E5CC, #3B82F6);
+  background: linear-gradient(135deg, #3B82F6, #7C3AED, #F43F5E);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
+/* Acrylic white button — background color bleeds through */
 .btn-primary {
-  background: linear-gradient(135deg, #00E5CC, #3B82F6);
-  color: #0A0E17;
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(20px) saturate(180%);
+  color: #0F172A;
   font-weight: 600;
   padding: 0.75rem 2rem;
-  border-radius: 0.5rem;
+  border-radius: 0.75rem;
   transition: all 0.2s ease-out;
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(0, 0, 0, 0.04);
 }
 
 .btn-primary:hover {
-  box-shadow: 0 0 30px rgba(0, 229, 204, 0.4);
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.06);
+  transform: translateY(-1px);
+}
+
+/* Solid blue CTA — high visibility */
+.btn-cta {
+  background: #3B82F6;
+  color: #FFFFFF;
+  font-weight: 600;
+  padding: 0.75rem 2rem;
+  border-radius: 0.75rem;
+  transition: all 0.2s ease-out;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: none;
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
+}
+
+.btn-cta:hover {
+  background: #2563EB;
+  box-shadow: 0 6px 24px rgba(59, 130, 246, 0.45);
   transform: translateY(-1px);
 }
 
 .card {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.7);
   border-radius: 0.75rem;
   padding: 1.5rem;
   transition: all 0.2s ease-out;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .card:hover {
-  border-color: rgba(0, 229, 204, 0.3);
-  box-shadow: 0 0 30px rgba(0, 229, 204, 0.08);
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
 }
+
+/* Organic gradient blobs */
+@keyframes blob {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(30px, -50px) scale(1.1); }
+  50% { transform: translate(-20px, 20px) scale(0.95); }
+  75% { transform: translate(40px, 30px) scale(1.05); }
+}
+
+.animate-blob {
+  animation: blob 20s ease-in-out infinite;
+}
+
+.animation-delay-2000 { animation-delay: 2s; }
+.animation-delay-3000 { animation-delay: 4s; }
+.animation-delay-4000 { animation-delay: 6s; }

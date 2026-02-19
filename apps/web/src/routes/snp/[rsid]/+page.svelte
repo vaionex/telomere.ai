@@ -1,165 +1,204 @@
 <script>
   import { page } from '$app/stores';
-  import { lookupSnp } from '@telomere/snp-db';
-  import { rawSnps, isLoaded } from '$lib/stores/genetic-data.js';
+  import { lookupSnp, getByGene, getByCategory } from '@telomere/snp-db';
+  import { isLoaded, rawSnps } from '$lib/stores/genetic-data.js';
+  import { matchedSnps } from '$lib/stores/reports.js';
+  import { get } from 'svelte/store';
   import RiskGauge from '$lib/components/RiskGauge.svelte';
 
-  const rsid = $derived($page.params.rsid);
-  const snp = $derived(lookupSnp(rsid));
-  const userData = $derived($rawSnps.get(rsid));
-  const userGenotype = $derived(userData ? (userData.genotype || userData.allele1 + userData.allele2) : null);
+  let rsid = $derived($page.params.rsid);
+  let snp = $derived(lookupSnp(rsid));
+  let hasData = $state(false);
+  let userMatch = $state(null);
+  let relatedSnps = $derived(() => {
+    if (!snp) return [];
+    const byGene = getByGene(snp.gene).filter(s => s.rsid !== rsid);
+    const byCat = snp.categories?.length
+      ? getByCategory(snp.categories[0]).filter(s => s.rsid !== rsid && !byGene.some(g => g.rsid === s.rsid))
+      : [];
+    return [...byGene, ...byCat].slice(0, 6);
+  });
 
-  function getRiskLevel(snpInfo, genotype) {
-    if (!snpInfo || !genotype) return null;
-    const alleles = genotype.split('');
-    const riskCount = alleles.filter(a => a === snpInfo.riskAllele).length;
-    if (riskCount === 2) return { level: 'high', percent: 85 };
-    if (riskCount === 1) return { level: 'moderate', percent: 55 };
-    return { level: 'low', percent: 20 };
+  $effect(() => {
+    hasData = get(isLoaded);
+    if (hasData) {
+      const matched = get(matchedSnps);
+      userMatch = matched.find(m => m.rsid === rsid) || null;
+    }
+  });
+
+  function riskColor(level) {
+    if (level === 'high') return 'text-accent-red';
+    if (level === 'moderate') return 'text-accent-amber';
+    return 'text-accent-green';
   }
-
-  const risk = $derived(getRiskLevel(snp, userGenotype));
+  function riskBg(level) {
+    if (level === 'high') return 'bg-accent-red/10';
+    if (level === 'moderate') return 'bg-accent-amber/10';
+    return 'bg-accent-green/10';
+  }
 </script>
 
-<svelte:head><title>{rsid} — {snp?.gene || 'SNP'} — Telomere AI</title></svelte:head>
+<svelte:head>
+  <title>{rsid} — {snp?.gene || 'SNP'} — Telomere.ai</title>
+</svelte:head>
 
-<div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
-  <a href="/explore" class="text-text-tertiary hover:text-text-secondary text-sm mb-6 inline-block">← Back to Explorer</a>
+<section class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-6">
+  <a href="/explore" class="inline-flex items-center gap-1 text-text-tertiary hover:text-text-primary text-sm transition-colors">
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+    Back to Explorer
+  </a>
 
   {#if !snp}
     <div class="card text-center py-12">
-      <h1 class="text-2xl font-bold mb-2">SNP Not Found</h1>
-      <p class="text-text-tertiary mb-4"><span class="font-mono">{rsid}</span> is not in our curated database.</p>
-      <a href="/explore" class="btn-primary">Browse SNPs</a>
+      <p class="text-text-secondary">SNP <span class="font-mono">{rsid}</span> not found in database.</p>
     </div>
   {:else}
-    <!-- Header card -->
-    <div class="card glow-border mb-6">
-      <div class="flex items-start justify-between gap-4">
+    <!-- Header -->
+    <div class="card space-y-4">
+      <div class="flex items-start justify-between flex-wrap gap-4">
         <div>
-          <div class="flex items-center gap-3 mb-1">
-            <h1 class="text-2xl font-mono font-bold text-accent-cyan">{snp.rsid}</h1>
-            <span class="px-2 py-0.5 rounded-full text-xs glass text-text-secondary">{snp.significance}</span>
-          </div>
-          <p class="text-lg font-semibold mb-1">{snp.gene} — {snp.trait}</p>
-          <p class="text-text-tertiary text-sm">Chromosome {snp.chromosome} • Position {snp.position.toLocaleString()}</p>
+          <h1 class="text-2xl font-bold font-mono text-accent-blue">{snp.rsid}</h1>
+          <p class="text-lg text-text-secondary mt-1">{snp.gene} — {snp.trait}</p>
         </div>
-        {#if risk}
-          <RiskGauge percent={risk.percent} size={80} label={risk.level} />
+        {#if userMatch}
+          <div class="flex items-center gap-3">
+            <div class="text-right">
+              <p class="text-xs text-text-tertiary">Your Genotype</p>
+              <p class="text-2xl font-mono font-bold {riskColor(userMatch.riskLevel)}">{userMatch.userGenotype}</p>
+              <p class="text-xs font-medium {riskColor(userMatch.riskLevel)}">{userMatch.riskLevel} risk</p>
+            </div>
+            <RiskGauge percent={userMatch.riskPercent} size={64} />
+          </div>
         {/if}
+      </div>
+
+      {#if userMatch}
+        <div class="rounded-xl p-4 {riskBg(userMatch.riskLevel)}">
+          <p class="text-sm">
+            {#if userMatch.riskLevel === 'high'}
+              {snp.riskDescription}
+            {:else if userMatch.riskLevel === 'moderate'}
+              {snp.heterozygousDescription || snp.riskDescription}
+            {:else}
+              {snp.normalDescription}
+            {/if}
+          </p>
+        </div>
+      {/if}
+    </div>
+
+    <!-- Details grid -->
+    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+      <div class="card">
+        <p class="text-xs text-text-tertiary">Chromosome</p>
+        <p class="font-mono font-semibold mt-1">{snp.chromosome}</p>
+      </div>
+      <div class="card">
+        <p class="text-xs text-text-tertiary">Position</p>
+        <p class="font-mono font-semibold mt-1">{snp.position?.toLocaleString() || '—'}</p>
+      </div>
+      <div class="card">
+        <p class="text-xs text-text-tertiary">Significance</p>
+        <p class="font-semibold mt-1 text-sm">{snp.significance || '—'}</p>
+      </div>
+      <div class="card">
+        <p class="text-xs text-text-tertiary">Risk Allele</p>
+        <p class="font-mono font-semibold mt-1 text-accent-red">{snp.riskAllele}</p>
+      </div>
+      <div class="card">
+        <p class="text-xs text-text-tertiary">Normal Allele</p>
+        <p class="font-mono font-semibold mt-1 text-accent-green">{snp.normalAllele}</p>
+      </div>
+      <div class="card">
+        <p class="text-xs text-text-tertiary">Categories</p>
+        <div class="flex flex-wrap gap-1 mt-1">
+          {#each snp.categories || [] as cat}
+            <span class="px-2 py-0.5 rounded-full text-xs glass">{cat}</span>
+          {/each}
+        </div>
       </div>
     </div>
 
-    <!-- Your genotype -->
-    {#if userGenotype}
-      <div class="card mb-6">
-        <h2 class="font-semibold mb-3">Your Genotype</h2>
-        <div class="flex items-center gap-4">
-          <span class="text-4xl font-mono font-bold gradient-text">{userGenotype}</span>
-          <div>
-            <p class="text-sm {risk?.level === 'high' ? 'text-accent-red' : risk?.level === 'moderate' ? 'text-accent-amber' : 'text-accent-green'}">
-              {risk?.level === 'high' ? snp.riskDescription : risk?.level === 'moderate' ? snp.heterozygousDescription : snp.normalDescription}
-            </p>
-          </div>
-        </div>
-      </div>
-    {:else if $isLoaded}
-      <div class="card mb-6 text-center">
-        <p class="text-text-tertiary text-sm">This SNP was not found in your genetic data.</p>
+    <!-- Conditions & Recommendations -->
+    {#if snp.conditions?.length}
+      <div class="card">
+        <h3 class="font-semibold text-sm mb-3">Associated Conditions</h3>
+        <ul class="space-y-1">
+          {#each snp.conditions as condition}
+            <li class="text-sm text-text-secondary flex items-center gap-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-accent-amber flex-shrink-0"></span>
+              {condition}
+            </li>
+          {/each}
+        </ul>
       </div>
     {/if}
 
-    <!-- Details -->
-    <div class="grid gap-6">
-      <!-- Alleles -->
+    {#if snp.recommendations?.length}
       <div class="card">
-        <h2 class="font-semibold mb-3">Allele Information</h2>
-        <div class="grid grid-cols-2 gap-4 text-sm">
-          <div>
-            <span class="text-text-tertiary">Risk Allele</span>
-            <p class="font-mono text-lg text-accent-red font-bold">{snp.riskAllele}</p>
-          </div>
-          <div>
-            <span class="text-text-tertiary">Normal Allele</span>
-            <p class="font-mono text-lg text-accent-green font-bold">{snp.normalAllele}</p>
-          </div>
-        </div>
+        <h3 class="font-semibold text-sm mb-3">Recommendations</h3>
+        <ul class="space-y-1">
+          {#each snp.recommendations as rec}
+            <li class="text-sm text-text-secondary flex items-center gap-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-accent-green flex-shrink-0"></span>
+              {rec}
+            </li>
+          {/each}
+        </ul>
       </div>
+    {/if}
 
-      <!-- Population frequency -->
+    <!-- Population frequency -->
+    {#if snp.populationFrequency}
       <div class="card">
-        <h2 class="font-semibold mb-3">Population Frequency</h2>
-        <div class="space-y-3">
+        <h3 class="font-semibold text-sm mb-3">Population Frequency</h3>
+        <div class="flex gap-4">
           {#each Object.entries(snp.populationFrequency) as [genotype, freq]}
-            {@const pct = Math.round(freq * 100)}
-            {@const isUser = userGenotype === genotype}
-            <div class="flex items-center gap-3">
-              <span class="font-mono text-sm w-8 {isUser ? 'text-accent-cyan font-bold' : 'text-text-secondary'}">{genotype}</span>
-              <div class="flex-1 h-3 bg-white/5 rounded-full overflow-hidden">
-                <div class="h-full rounded-full transition-all duration-700 {isUser ? 'bg-gradient-to-r from-accent-cyan to-accent-blue' : 'bg-white/10'}" style="width: {pct}%"></div>
+            <div class="text-center">
+              <p class="font-mono text-sm font-bold">{genotype}</p>
+              <div class="w-16 h-1.5 bg-black/5 rounded-full mt-1 overflow-hidden">
+                <div class="h-full bg-accent-blue rounded-full" style="width: {freq * 100}%"></div>
               </div>
-              <span class="text-sm text-text-secondary w-12 text-right">{pct}%</span>
-              {#if isUser}<span class="text-xs text-accent-cyan">You</span>{/if}
+              <p class="text-xs text-text-tertiary mt-1">{(freq * 100).toFixed(0)}%</p>
             </div>
           {/each}
         </div>
       </div>
+    {/if}
 
-      <!-- Conditions -->
-      {#if snp.conditions?.length}
-        <div class="card">
-          <h2 class="font-semibold mb-3">Associated Conditions</h2>
-          <ul class="space-y-2">
-            {#each snp.conditions as condition}
-              <li class="flex items-center gap-2 text-sm text-text-secondary">
-                <span class="w-1.5 h-1.5 rounded-full bg-accent-cyan flex-shrink-0"></span>
-                {condition}
-              </li>
-            {/each}
-          </ul>
-        </div>
-      {/if}
-
-      <!-- Recommendations -->
-      {#if snp.recommendations?.length}
-        <div class="card">
-          <h2 class="font-semibold mb-3">Recommendations</h2>
-          <ul class="space-y-2">
-            {#each snp.recommendations as rec}
-              <li class="flex items-start gap-2 text-sm text-text-secondary">
-                <span class="text-accent-green mt-0.5">✓</span>
-                {rec}
-              </li>
-            {/each}
-          </ul>
-        </div>
-      {/if}
-
-      <!-- Categories -->
+    <!-- References -->
+    {#if snp.references?.length}
       <div class="card">
-        <h2 class="font-semibold mb-3">Categories</h2>
-        <div class="flex gap-2 flex-wrap">
-          {#each snp.categories as cat}
-            <a href="/explore?category={cat}" class="px-3 py-1.5 rounded-full glass text-sm text-text-secondary hover:text-accent-cyan transition-colors">{cat}</a>
+        <h3 class="font-semibold text-sm mb-3">References</h3>
+        <div class="flex flex-wrap gap-2">
+          {#each snp.references as ref}
+            {#if ref.startsWith('PMID:')}
+              <a href="https://pubmed.ncbi.nlm.nih.gov/{ref.replace('PMID:', '')}" target="_blank" rel="noopener" class="text-xs text-accent-blue hover:underline font-mono">{ref}</a>
+            {:else}
+              <span class="text-xs text-text-secondary font-mono">{ref}</span>
+            {/if}
           {/each}
         </div>
       </div>
+    {/if}
 
-      <!-- References -->
-      {#if snp.references?.length}
-        <div class="card">
-          <h2 class="font-semibold mb-3">References</h2>
-          <div class="space-y-1">
-            {#each snp.references as ref}
-              {#if ref.startsWith('PMID:')}
-                <a href="https://pubmed.ncbi.nlm.nih.gov/{ref.replace('PMID:', '')}" target="_blank" rel="noopener" class="block text-sm text-accent-blue hover:underline font-mono">{ref}</a>
-              {:else}
-                <span class="block text-sm text-text-secondary font-mono">{ref}</span>
-              {/if}
-            {/each}
-          </div>
+    <!-- Related SNPs -->
+    {#if relatedSnps().length > 0}
+      <div>
+        <h3 class="font-semibold text-sm mb-3">Related SNPs</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {#each relatedSnps() as rel (rel.rsid)}
+            <a href="/snp/{rel.rsid}" class="card group">
+              <div class="flex items-center gap-2">
+                <span class="font-mono text-accent-blue text-sm">{rel.rsid}</span>
+                <span class="text-text-tertiary text-xs">{rel.gene}</span>
+              </div>
+              <p class="text-xs text-text-secondary mt-1 group-hover:text-text-primary transition-colors">{rel.trait}</p>
+            </a>
+          {/each}
         </div>
-      {/if}
-    </div>
+      </div>
+    {/if}
   {/if}
-</div>
+</section>

@@ -3,42 +3,41 @@
 </script>
 
 <svelte:head>
-  <title>Open Genetic Data — Telomere AI</title>
+  <title>Upload Genetic Data — Telomere.ai</title>
 </svelte:head>
 
-<div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
-  <div class="text-center mb-12">
-    <h1 class="text-4xl font-bold mb-4">Open Your <span class="gradient-text">Genetic Data</span></h1>
-    <p class="text-text-secondary max-w-xl mx-auto">Your file is processed entirely on this device. Nothing is ever sent to any server.</p>
+<section class="relative min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center px-4 py-16">
+  <!-- Background blobs -->
+  <div class="absolute inset-0 overflow-hidden pointer-events-none -z-10">
+    <div class="absolute top-1/4 -left-32 w-96 h-96 bg-accent-blue/5 rounded-full blur-3xl"></div>
+    <div class="absolute bottom-1/4 -right-32 w-96 h-96 bg-accent-violet/5 rounded-full blur-3xl"></div>
   </div>
 
-  <FileUpload />
+  <div class="max-w-2xl w-full space-y-8">
+    <!-- Privacy banner -->
+    <div class="card text-center space-y-3">
+      <div class="w-12 h-12 mx-auto rounded-xl bg-accent-green/10 flex items-center justify-center">
+        <svg class="w-6 h-6 text-accent-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+        </svg>
+      </div>
+      <h2 class="text-lg font-bold text-text-primary">Your DNA never leaves your browser</h2>
+      <p class="text-text-secondary text-sm max-w-md mx-auto">Zero servers. Zero uploads. Your genome stays in your browser. All analysis runs locally using JavaScript — nothing is ever sent anywhere.</p>
+    </div>
 
-  <div class="mt-12 grid sm:grid-cols-3 gap-6">
-    <div class="card text-center">
-      <span class="text-2xl mb-2 block">🖥️</span>
-      <h3 class="font-semibold text-sm mb-1">100% Local</h3>
-      <p class="text-text-tertiary text-xs">Processed on your computer. Works offline.</p>
+    <!-- Header -->
+    <div class="text-center">
+      <h1 class="text-3xl sm:text-4xl font-bold text-text-primary">Analyze Your Genome</h1>
+      <p class="text-text-secondary mt-2">Upload your genetic data file to get started</p>
     </div>
-    <div class="card text-center">
-      <span class="text-2xl mb-2 block">⚡</span>
-      <h3 class="font-semibold text-sm mb-1">Instant Analysis</h3>
-      <p class="text-text-tertiary text-xs">Parse 500,000+ SNPs in seconds.</p>
-    </div>
-    <div class="card text-center">
-      <span class="text-2xl mb-2 block">📊</span>
-      <h3 class="font-semibold text-sm mb-1">6 Report Types</h3>
-      <p class="text-text-tertiary text-xs">Health, longevity, nutrition, pharma, traits, and carrier status.</p>
+
+    <!-- Upload component -->
+    <FileUpload />
+
+    <!-- Supported formats -->
+    <div class="text-center text-xs text-text-tertiary space-y-1">
+      <p>Supports 23andMe, AncestryDNA, MyHeritage, and VCF files up to 50MB</p>
+      <p>Your file is read entirely in your browser and never transmitted</p>
     </div>
   </div>
-
-  <div class="mt-12 card">
-    <h3 class="font-semibold mb-3">How to get your raw data</h3>
-    <div class="space-y-2 text-sm text-text-secondary">
-      <p><strong class="text-text-primary">23andMe:</strong> Settings → 23andMe Data → Download Raw Data</p>
-      <p><strong class="text-text-primary">AncestryDNA:</strong> Settings → Download DNA Data → Confirm & Download</p>
-      <p><strong class="text-text-primary">MyHeritage:</strong> DNA → Manage DNA kits → Download raw DNA data</p>
-      <p><strong class="text-text-primary">VCF:</strong> Any VCF 4.x file from a genetic testing provider or research study.</p>
-    </div>
-  </div>
-</div>
+</section>
