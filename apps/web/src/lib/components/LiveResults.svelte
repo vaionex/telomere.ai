@@ -8,10 +8,19 @@
   function assessRisk(snpInfo, genotype) {
     const alleles = genotype.split('');
     const riskCount = alleles.filter(a => a === snpInfo.riskAllele).length;
-    if (riskCount === 2) return 'high';
-    if (riskCount === 1) return 'moderate';
+    const sigWeight = { 'well-established': 1.0, 'established': 0.8, 'moderate': 0.6, 'preliminary': 0.4, 'low': 0.2 }[snpInfo.significance] || 0.5;
+    const isRecessive = snpInfo.categories?.includes('carrier');
+    if (isRecessive) {
+      if (riskCount === 2) return 'high';
+      if (riskCount === 1) return 'carrier';
+      return 'low';
+    }
+    if (riskCount === 2) return sigWeight >= 0.6 ? 'high' : 'moderate';
+    if (riskCount === 1) return sigWeight >= 0.8 ? 'moderate' : 'low';
     return 'low';
   }
+
+  const riskPercentMap = { high: 85, moderate: 55, carrier: 35, low: 15 };
 
   const enriched = $derived(matches.map(m => {
     const db = SNP_MAP.get(m.rsid);
@@ -21,7 +30,7 @@
       ...db,
       userGenotype: m.genotype,
       riskLevel,
-      riskPercent: riskLevel === 'high' ? 85 : riskLevel === 'moderate' ? 55 : 20
+      riskPercent: riskPercentMap[riskLevel] || 15
     };
   }).filter(Boolean));
 
@@ -36,7 +45,7 @@
   });
 
   const riskBorderColor = (level) =>
-    level === 'high' ? 'border-l-accent-red' : level === 'moderate' ? 'border-l-accent-amber' : 'border-l-accent-green';
+    level === 'high' ? 'border-l-accent-red' : level === 'moderate' ? 'border-l-accent-amber' : level === 'carrier' ? 'border-l-accent-blue' : 'border-l-accent-green';
 
   const riskDesc = (snp) =>
     snp.riskLevel === 'high' ? snp.riskDescription : snp.riskLevel === 'moderate' ? (snp.heterozygousDescription || snp.riskDescription) : snp.normalDescription;
@@ -50,7 +59,7 @@
         {@const meta = categoryMeta[cat]}
         {#if meta}
           <span class="px-3 py-1.5 rounded-full text-xs glass flex items-center gap-1.5">
-            <span>{meta.icon}</span>
+            <span class="w-4 h-4 flex-shrink-0">{@html meta.iconSvg}</span>
             <span class="text-text-secondary">{meta.title}:</span>
             <span class="font-bold text-text-primary">{count}</span>
           </span>
@@ -70,7 +79,7 @@
           <div class="flex items-center gap-3 mb-1">
             <span class="font-mono text-accent-cyan text-sm">{snp.rsid}</span>
             <span class="text-text-secondary text-sm">{snp.gene}</span>
-            <span class="px-2 py-0.5 rounded-full text-xs glass {snp.riskLevel === 'high' ? 'text-accent-red' : snp.riskLevel === 'moderate' ? 'text-accent-amber' : 'text-accent-green'}">{snp.riskLevel}</span>
+            <span class="px-2 py-0.5 rounded-full text-xs glass {snp.riskLevel === 'high' ? 'text-accent-red' : snp.riskLevel === 'moderate' ? 'text-accent-amber' : snp.riskLevel === 'carrier' ? 'text-accent-blue' : 'text-accent-green'}">{snp.riskLevel}</span>
           </div>
           <h3 class="font-semibold text-sm mb-1 group-hover:text-accent-cyan transition-colors">{snp.trait}</h3>
           <p class="text-text-secondary text-xs leading-relaxed">{riskDesc(snp)}</p>

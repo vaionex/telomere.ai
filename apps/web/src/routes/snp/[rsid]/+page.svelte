@@ -163,17 +163,59 @@
     {#if snp.populationFrequency}
       <div class="card">
         <h3 class="font-semibold text-sm mb-3">Population Frequency</h3>
-        <div class="flex gap-4">
-          {#each Object.entries(snp.populationFrequency) as [genotype, freq]}
-            <div class="text-center">
-              <p class="font-mono text-sm font-bold">{genotype}</p>
-              <div class="w-16 h-1.5 bg-black/5 rounded-full mt-1 overflow-hidden">
-                <div class="h-full bg-accent-blue rounded-full" style="width: {freq * 100}%"></div>
+        <div class="space-y-2">
+          {#each Object.entries(snp.populationFrequency) as [population, freq]}
+            <div class="flex items-center gap-3">
+              <span class="text-xs text-text-secondary w-28 flex-shrink-0 text-right">{population}</span>
+              <div class="flex-1 h-5 bg-black/5 rounded-full overflow-hidden">
+                <div class="h-full bg-accent-blue rounded-full transition-all" style="width: {freq * 100}%"></div>
               </div>
-              <p class="text-xs text-text-tertiary mt-1">{(freq * 100).toFixed(0)}%</p>
+              <span class="text-xs font-mono text-text-tertiary w-12">{(freq * 100).toFixed(1)}%</span>
             </div>
           {/each}
         </div>
+      </div>
+    {/if}
+
+    <!-- External databases -->
+    <div class="card">
+      <h3 class="font-semibold text-sm mb-3">Research Links</h3>
+      <div class="flex flex-wrap gap-3">
+        <a href="https://www.ncbi.nlm.nih.gov/snp/{snp.rsid}" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg glass text-xs text-accent-blue hover:underline">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+          dbSNP
+        </a>
+        <a href="https://www.snpedia.com/index.php/{snp.rsid}" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg glass text-xs text-accent-blue hover:underline">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+          SNPedia
+        </a>
+        <a href="https://www.ncbi.nlm.nih.gov/clinvar/?term={snp.rsid}" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg glass text-xs text-accent-blue hover:underline">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+          ClinVar
+        </a>
+      </div>
+    </div>
+
+    <!-- Gene context: other SNPs in same gene -->
+    {#if relatedSnps().filter(r => getByGene(snp.gene).some(g => g.rsid === r.rsid)).length > 0}
+      <div class="card">
+        <h3 class="font-semibold text-sm mb-3">Other variants in {snp.gene}</h3>
+        <div class="flex flex-wrap gap-2">
+          {#each getByGene(snp.gene).filter(s => s.rsid !== rsid) as rel}
+            <a href="/snp/{rel.rsid}" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg glass text-xs hover:bg-accent-blue/5 transition-colors">
+              <span class="font-mono text-accent-blue">{rel.rsid}</span>
+              <span class="text-text-tertiary">{rel.trait}</span>
+            </a>
+          {/each}
+        </div>
+      </div>
+    {/if}
+
+    <!-- Heterozygous description -->
+    {#if snp.heterozygousDescription && userMatch?.riskLevel === 'moderate'}
+      <div class="card">
+        <h3 class="font-semibold text-sm mb-3">Carrier Information</h3>
+        <p class="text-sm text-text-secondary">{snp.heterozygousDescription}</p>
       </div>
     {/if}
 

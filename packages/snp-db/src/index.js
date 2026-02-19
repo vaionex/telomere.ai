@@ -54,6 +54,7 @@ export function getAllSnps() {
 
 /** Match user's SNP map against database, returning enriched results */
 export function matchSnps(userSnps) {
+  const riskPercentMap = { high: 85, moderate: 55, carrier: 35, low: 15 };
   const results = [];
   for (const [rsid, snpInfo] of Object.entries(snpDatabase)) {
     const userGenotype = userSnps.get(rsid);
@@ -66,7 +67,7 @@ export function matchSnps(userSnps) {
         userAllele1: userGenotype.allele1,
         userAllele2: userGenotype.allele2,
         riskLevel,
-        riskPercent: riskLevel === 'high' ? 85 : riskLevel === 'moderate' ? 55 : riskLevel === 'low' ? 20 : 10
+        riskPercent: riskPercentMap[riskLevel] || 15
       });
     }
   }
@@ -76,8 +77,25 @@ export function matchSnps(userSnps) {
 function assessRisk(snp, genotype) {
   const alleles = genotype.split('');
   const riskCount = alleles.filter(a => a === snp.riskAllele).length;
-  if (riskCount === 2) return 'high';
-  if (riskCount === 1) return 'moderate';
+
+  const sigWeight = {
+    'well-established': 1.0,
+    'established': 0.8,
+    'moderate': 0.6,
+    'preliminary': 0.4,
+    'low': 0.2
+  }[snp.significance] || 0.5;
+
+  const isRecessive = snp.categories?.includes('carrier');
+
+  if (isRecessive) {
+    if (riskCount === 2) return 'high';
+    if (riskCount === 1) return 'carrier';
+    return 'low';
+  }
+
+  if (riskCount === 2) return sigWeight >= 0.6 ? 'high' : 'moderate';
+  if (riskCount === 1) return sigWeight >= 0.8 ? 'moderate' : 'low';
   return 'low';
 }
 

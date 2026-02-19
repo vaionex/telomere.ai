@@ -1,8 +1,8 @@
 <script>
   import RiskGauge from './RiskGauge.svelte';
   let { snp } = $props();
-  const borderColor = $derived(snp.riskLevel === 'high' ? 'border-l-accent-red' : snp.riskLevel === 'moderate' ? 'border-l-accent-amber' : 'border-l-accent-green');
-  const desc = $derived(snp.riskLevel === 'high' ? snp.riskDescription : snp.riskLevel === 'moderate' ? (snp.heterozygousDescription || snp.riskDescription) : snp.normalDescription);
+  const borderColor = $derived(snp.riskLevel === 'high' ? 'border-l-accent-red' : snp.riskLevel === 'moderate' ? 'border-l-accent-amber' : snp.riskLevel === 'carrier' ? 'border-l-accent-blue' : 'border-l-accent-green');
+  const desc = $derived(snp.riskLevel === 'high' ? snp.riskDescription : snp.riskLevel === 'moderate' ? (snp.heterozygousDescription || snp.riskDescription) : snp.riskLevel === 'carrier' ? (snp.heterozygousDescription || 'Carrier of one copy — not typically affected') : snp.normalDescription);
 </script>
 
 <a href="/snp/{snp.rsid}" class="card border-l-4 {borderColor} flex items-start gap-4 group">
@@ -10,7 +10,7 @@
     <div class="flex items-center gap-3 mb-1">
       <span class="font-mono text-accent-cyan text-sm">{snp.rsid}</span>
       <span class="text-text-secondary text-sm">{snp.gene}</span>
-      <span class="px-2 py-0.5 rounded-full text-xs glass {snp.riskLevel === 'high' ? 'text-accent-red' : snp.riskLevel === 'moderate' ? 'text-accent-amber' : 'text-accent-green'}">{snp.riskLevel}</span>
+      <span class="px-2 py-0.5 rounded-full text-xs glass {snp.riskLevel === 'high' ? 'text-accent-red' : snp.riskLevel === 'moderate' ? 'text-accent-amber' : snp.riskLevel === 'carrier' ? 'text-accent-blue' : 'text-accent-green'}">{snp.riskLevel}</span>
     </div>
     <h3 class="font-semibold text-sm mb-1 group-hover:text-accent-cyan transition-colors">{snp.trait}</h3>
     <p class="text-text-secondary text-xs leading-relaxed">{desc}</p>

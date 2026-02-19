@@ -1,6 +1,6 @@
 <script>
   import { goto } from '$app/navigation';
-  import { isLoaded, rawSnps } from '$lib/stores/genetic-data.js';
+  import { isLoaded, rawSnps, genomes, canCompare, removeGenome, clearAll } from '$lib/stores/genetic-data.js';
   import { matchedSnps, reportsByCategory, categoryMeta, pgsResults } from '$lib/stores/reports.js';
   import { get } from 'svelte/store';
 
@@ -9,6 +9,10 @@
   let matched = $state([]);
   let byCat = $state({});
   let pgs = $state([]);
+  let genomesVal = $state([]);
+  let showCompare = $state(false);
+  let storageUsed = $state('');
+  let showClearConfirm = $state(false);
 
   $effect(() => {
     const l = get(isLoaded);
@@ -18,7 +22,32 @@
     matched = get(matchedSnps);
     byCat = get(reportsByCategory);
     pgs = get(pgsResults);
+    genomesVal = get(genomes);
+    showCompare = get(canCompare);
+
+    // Estimate localStorage usage
+    try {
+      let total = 0;
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        total += (localStorage.getItem(key) || '').length * 2; // UTF-16
+      }
+      if (total > 1048576) storageUsed = (total / 1048576).toFixed(1) + ' MB';
+      else storageUsed = (total / 1024).toFixed(0) + ' KB';
+    } catch { storageUsed = 'unknown'; }
   });
+
+  function handleRemoveGenome(index) {
+    removeGenome(index);
+    genomesVal = get(genomes);
+    if (genomesVal.length === 0) goto('/upload');
+  }
+
+  function handleClearAll() {
+    clearAll();
+    try { localStorage.clear(); } catch {}
+    goto('/upload');
+  }
 
   const riskCount = $derived(matched.filter(s => s.riskLevel === 'high' || s.riskLevel === 'moderate').length);
   const categories = ['health', 'longevity', 'nutrition', 'pharma', 'traits', 'carrier'];
@@ -49,10 +78,15 @@
         <span class="text-xs text-accent-green font-medium">Processed locally in your browser</span>
       </div>
     </div>
-    <a href="/explore" class="btn-primary text-sm !py-2 !px-4">
-      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-      Explore All SNPs
-    </a>
+    <div class="flex items-center gap-3">
+      {#if showCompare}
+        <a href="/compare" class="btn-primary text-sm !py-2 !px-4">Compare Genomes</a>
+      {/if}
+      <a href="/explore" class="btn-primary text-sm !py-2 !px-4">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        Explore All SNPs
+      </a>
+    </div>
   </div>
 
   <!-- Summary cards -->
@@ -134,6 +168,47 @@
         <p class="text-xs text-text-secondary leading-relaxed">{meta.description}</p>
       </a>
     {/each}
+  </div>
+
+  <!-- Data Management -->
+  <div class="card space-y-4">
+    <div class="flex items-center justify-between">
+      <h2 class="font-semibold text-sm text-text-primary">Data Management</h2>
+      <span class="text-xs text-text-tertiary">Storage used: {storageUsed}</span>
+    </div>
+
+    {#if genomesVal.length > 0}
+      <div class="space-y-2">
+        {#each genomesVal as g, i}
+          <div class="flex items-center justify-between py-2 px-3 rounded-lg glass">
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full flex-shrink-0" style="background-color: {g.color}"></span>
+              <span class="text-sm font-medium">{g.name}</span>
+              <span class="text-xs text-text-tertiary">{g.snps?.size?.toLocaleString() || 0} variants</span>
+            </div>
+            <button
+              onclick={() => handleRemoveGenome(i)}
+              class="text-text-tertiary hover:text-accent-red transition-colors text-xs px-2 py-1"
+              title="Remove genome"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+          </div>
+        {/each}
+      </div>
+    {/if}
+
+    <div class="flex items-center gap-3 pt-2 border-t border-black/5">
+      <a href="/upload" class="text-sm text-accent-blue hover:underline">Upload another genome</a>
+      <span class="text-text-tertiary">|</span>
+      {#if !showClearConfirm}
+        <button onclick={() => showClearConfirm = true} class="text-sm text-accent-red hover:underline">Clear all data</button>
+      {:else}
+        <span class="text-sm text-accent-red">Are you sure?</span>
+        <button onclick={handleClearAll} class="text-sm text-white bg-accent-red px-3 py-1 rounded-lg hover:opacity-80">Yes, clear everything</button>
+        <button onclick={() => showClearConfirm = false} class="text-sm text-text-tertiary hover:text-text-primary">Cancel</button>
+      {/if}
+    </div>
   </div>
 </section>
 {/if}

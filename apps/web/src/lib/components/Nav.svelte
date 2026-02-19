@@ -1,5 +1,14 @@
 <script>
+  import { canCompare } from '$lib/stores/genetic-data.js';
+  import { get } from 'svelte/store';
+
   let mobileOpen = $state(false);
+  let showCompare = $state(false);
+
+  $effect(() => {
+    const unsub = canCompare.subscribe(val => { showCompare = val; });
+    return unsub;
+  });
 </script>
 
 <nav class="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-white/70 border-b border-black/5">
@@ -20,6 +29,9 @@
         <a href="/blog" class="text-text-secondary hover:text-text-primary transition-colors text-sm">Blog</a>
         <a href="/about" class="text-text-secondary hover:text-text-primary transition-colors text-sm">About</a>
         <a href="/explore" class="text-text-secondary hover:text-text-primary transition-colors text-sm">Explorer</a>
+        {#if showCompare}
+          <a href="/compare" class="text-text-secondary hover:text-text-primary transition-colors text-sm">Compare</a>
+        {/if}
         <a href="/upload" class="btn-cta text-sm !py-2 !px-4">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611l-.772.13c-3.052.513-6.174.513-9.226 0l-.772-.13c-1.717-.293-2.3-2.379-1.067-3.61L5 14.5"/>
           </svg>
@@ -51,6 +63,9 @@
         <a href="/blog" class="block text-text-secondary hover:text-text-primary py-2" onclick={() => mobileOpen = false}>Blog</a>
         <a href="/about" class="block text-text-secondary hover:text-text-primary py-2" onclick={() => mobileOpen = false}>About</a>
         <a href="/explore" class="block text-text-secondary hover:text-text-primary py-2" onclick={() => mobileOpen = false}>Explorer</a>
+        {#if showCompare}
+          <a href="/compare" class="block text-text-secondary hover:text-text-primary py-2" onclick={() => mobileOpen = false}>Compare</a>
+        {/if}
         <a href="/upload" class="btn-cta text-sm text-center block" onclick={() => mobileOpen = false}>Analyze DNA</a>
         <a href="/download" class="btn-primary text-sm text-center block" onclick={() => mobileOpen = false}>Download</a>
       </div>
