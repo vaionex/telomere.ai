@@ -38,7 +38,7 @@
 
 <svelte:head>
   <title>Telomere AI — Decode Your DNA. Locally. For Free.</title>
-  <meta name="description" content="Free, open-source genetic analysis platform. Upload your 23andMe, AncestryDNA, or VCF data and get health, trait, and pharmacogenomic insights. 332 SNPs analyzed. 100% in your browser." />
+  <meta name="description" content="Free, open-source genetic analysis. Upload your 23andMe, AncestryDNA, or VCF data and get health, trait, and pharmacogenomic insights. 332 SNPs, 238 traits. 100% in your browser — your DNA never leaves your device." />
   <meta property="og:title" content="Telomere AI — Decode Your DNA" />
   <meta property="og:description" content="Free genetic analysis. 332 SNPs, 238 traits, pharmacogenomics, family comparison. Your DNA never leaves your browser." />
   <meta property="og:type" content="website" />
@@ -87,9 +87,9 @@
         Your DNA stays on your computer. Always.
       </p>
       <div class="flex flex-col sm:flex-row items-center gap-4">
-        <a href="/download" class="btn-cta text-lg px-8 py-4">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-          Download for Free
+        <a href="/upload" class="btn-cta text-lg px-8 py-4">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611l-.772.13c-3.052.513-6.174.513-9.226 0l-.772-.13c-1.717-.293-2.3-2.379-1.067-3.61L5 14.5"/></svg>
+          Analyze Your DNA — Free
         </a>
         <a href="#how-it-works" class="text-text-secondary hover:text-text-primary transition-colors flex items-center gap-2">
           Learn More
@@ -290,9 +290,9 @@
     <div class="card p-12 glow-border">
       <h2 class="text-3xl sm:text-4xl font-bold mb-4">Ready to Decode Your DNA?</h2>
       <p class="text-text-secondary mb-8 max-w-xl mx-auto">Open your genetic data file and unlock comprehensive health insights. It takes less than 30 seconds.</p>
-      <a href="/download" class="btn-cta text-lg px-8 py-4">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-        Download — It's Free
+      <a href="/upload" class="btn-cta text-lg px-8 py-4">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611l-.772.13c-3.052.513-6.174.513-9.226 0l-.772-.13c-1.717-.293-2.3-2.379-1.067-3.61L5 14.5"/></svg>
+        Get Started — It's Free
       </a>
     </div>
   </div>

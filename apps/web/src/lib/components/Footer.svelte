@@ -6,7 +6,7 @@
         <ul class="space-y-2">
           <li><a href="/#features" class="text-text-secondary hover:text-accent-blue transition-colors text-sm">Features</a></li>
           <li><a href="/#reports" class="text-text-secondary hover:text-accent-blue transition-colors text-sm">Reports</a></li>
-          <li><a href="/download" class="text-text-secondary hover:text-accent-blue transition-colors text-sm">Download</a></li>
+          <li><a href="/upload" class="text-text-secondary hover:text-accent-blue transition-colors text-sm">Analyze DNA</a></li>
         </ul>
       </div>
       <div>
