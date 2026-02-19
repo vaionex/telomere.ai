@@ -6,7 +6,7 @@
 
   const steps = [
     { num: '01', title: 'Open File', desc: 'Select your raw genetic data file. We support 23andMe, AncestryDNA, MyHeritage, VCF, and full whole-genome sequencing files (4GB+).', icon: '📂' },
-    { num: '02', title: 'Analyze', desc: 'Our Rust engine streams through millions of variants and matches them against our curated health marker database — entirely on your machine.', icon: '🧬' },
+    { num: '02', title: 'Analyze', desc: 'Our engine streams through your genome and builds a personalized trait profile — matching against 330+ curated health markers entirely in your browser.', icon: '🧬' },
     { num: '03', title: 'Discover', desc: 'Get detailed reports on health risks, longevity, nutrition, drug response, traits, and carrier status.', icon: '🔬' }
   ];
 

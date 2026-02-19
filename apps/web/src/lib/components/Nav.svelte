@@ -28,8 +28,7 @@
         <a href="/#reports" class="text-text-secondary hover:text-text-primary transition-colors text-sm">Reports</a>
         <a href="/blog" class="text-text-secondary hover:text-text-primary transition-colors text-sm">Blog</a>
         <a href="/about" class="text-text-secondary hover:text-text-primary transition-colors text-sm">About</a>
-        <a href="/analysis" class="text-text-secondary hover:text-text-primary transition-colors text-sm">Dashboard</a>
-        <a href="/explore" class="text-text-secondary hover:text-text-primary transition-colors text-sm">Explorer</a>
+        <a href="/analysis" class="text-text-secondary hover:text-text-primary transition-colors text-sm">My Traits</a>
         {#if showCompare}
           <a href="/compare" class="text-text-secondary hover:text-text-primary transition-colors text-sm">Compare</a>
         {/if}
@@ -63,8 +62,7 @@
         <a href="/#reports" class="block text-text-secondary hover:text-text-primary py-2" onclick={() => mobileOpen = false}>Reports</a>
         <a href="/blog" class="block text-text-secondary hover:text-text-primary py-2" onclick={() => mobileOpen = false}>Blog</a>
         <a href="/about" class="block text-text-secondary hover:text-text-primary py-2" onclick={() => mobileOpen = false}>About</a>
-        <a href="/analysis" class="block text-text-secondary hover:text-text-primary py-2" onclick={() => mobileOpen = false}>Dashboard</a>
-        <a href="/explore" class="block text-text-secondary hover:text-text-primary py-2" onclick={() => mobileOpen = false}>Explorer</a>
+        <a href="/analysis" class="block text-text-secondary hover:text-text-primary py-2" onclick={() => mobileOpen = false}>My Traits</a>
         {#if showCompare}
           <a href="/compare" class="block text-text-secondary hover:text-text-primary py-2" onclick={() => mobileOpen = false}>Compare</a>
         {/if}
