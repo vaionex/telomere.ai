@@ -230,6 +230,46 @@ export const CONDITION_MERGES = {
   "Drug metabolism variation": "Reduced drug metabolism",
   "Metabolic trait": "Metabolic regulation",
   "Obesity risk": "Obesity",
+
+  // Height merges
+  "Predicted shorter height": "Height variation",
+  "Predicted taller height": "Height variation",
+  "Earlier puberty timing": "Growth timing variation",
+
+  // Obesity / body composition merges
+  "Obesity susceptibility": "Obesity",
+  "Higher body fat percentage": "Obesity",
+  "Central adiposity tendency": "Obesity",
+  "Reduced thermogenesis": "Obesity",
+
+  // Nose shape
+  "Nose shape variation": "Facial morphology",
+
+  // Freckling
+  "Increased freckling": "Freckling tendency",
+
+  // Dyslexia
+  "Dyslexia susceptibility": "Reading difficulty susceptibility",
+
+  // Nicotine
+  "Nicotine dependence susceptibility": "Nicotine dependence",
+
+  // Sun sensitivity
+  "Sun sensitivity": "Sun sensitivity / fair skin",
+  "Fair skin tendency": "Sun sensitivity / fair skin",
+
+  // Depression
+  "Depression susceptibility": "Depression risk",
+
+  // Cognitive
+  "Higher general intelligence": "Cognitive performance variation",
+  "Cortical thickness variation": "Cognitive performance variation",
+  "Educational attainment variation": "Cognitive performance variation",
+  "Mathematical ability variation": "Cognitive performance variation",
+
+  // Insomnia / sleep
+  "Insomnia susceptibility": "Insomnia risk",
+  "Short sleep duration tendency": "Sleep duration variation",
 };
 
 /**

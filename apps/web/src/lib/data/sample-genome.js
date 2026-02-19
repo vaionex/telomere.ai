@@ -106,6 +106,23 @@ export const SAMPLE_GENOME = {
     ['rs2231142', { chromosome: '4', position: 89052323, genotype: 'GG', allele1: 'G', allele2: 'G' }],
     ['rs57875989', { chromosome: '12', position: 26124973, genotype: 'AA', allele1: 'A', allele2: 'A' }],
 
+    // === NEW TRAIT SNPs (15) ===
+    ['rs1558902', { chromosome: '16', position: 53803574, genotype: 'TA', allele1: 'T', allele2: 'A' }],
+    ['rs17822931', { chromosome: '16', position: 48258198, genotype: 'CC', allele1: 'C', allele2: 'C' }],
+    ['rs10427255', { chromosome: '2', position: 145505888, genotype: 'TC', allele1: 'T', allele2: 'C' }],
+    ['rs72921001', { chromosome: '11', position: 7899576, genotype: 'CA', allele1: 'C', allele2: 'A' }],
+    ['rs17070145', { chromosome: '5', position: 167909282, genotype: 'TT', allele1: 'T', allele2: 'T' }],
+    ['rs16969968', { chromosome: '15', position: 78882925, genotype: 'GG', allele1: 'G', allele2: 'G' }],
+    ['rs324420', { chromosome: '1', position: 46870643, genotype: 'CA', allele1: 'C', allele2: 'A' }],
+    ['rs113851554', { chromosome: '2', position: 66662579, genotype: 'AG', allele1: 'A', allele2: 'G' }],
+    ['rs35874116', { chromosome: '1', position: 18876815, genotype: 'CT', allele1: 'C', allele2: 'T' }],
+    ['rs993137', { chromosome: '3', position: 85544267, genotype: 'GA', allele1: 'G', allele2: 'A' }],
+    ['rs2576037', { chromosome: '8', position: 32447037, genotype: 'CT', allele1: 'C', allele2: 'T' }],
+    ['rs199512', { chromosome: '15', position: 101849777, genotype: 'TT', allele1: 'T', allele2: 'T' }],
+    ['rs12203592', { chromosome: '6', position: 396321, genotype: 'CT', allele1: 'C', allele2: 'T' }],
+    ['rs11803731', { chromosome: '1', position: 152196942, genotype: 'TA', allele1: 'T', allele2: 'A' }],
+    ['rs2180439', { chromosome: '20', position: 21791561, genotype: 'TC', allele1: 'T', allele2: 'C' }],
+
     // === CARRIER (10 SNPs) ===
     ['rs334', { chromosome: '11', position: 5227002, genotype: 'AT', allele1: 'A', allele2: 'T' }],
     ['rs80338939', { chromosome: '13', position: 20763612, genotype: 'GG', allele1: 'G', allele2: 'G' }],
@@ -123,7 +140,7 @@ export const SAMPLE_GENOME = {
   ]),
   metadata: {
     format: 'demo',
-    totalSnps: 100,
+    totalSnps: 115,
     chromosomeCount: 22,
     buildVersion: 38,
     fileName: 'sample-demo-data.txt'
