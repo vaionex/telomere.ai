@@ -233,12 +233,8 @@
       {/if}
     {/if}
 
-    <!-- View mode toggle + filters -->
+    <!-- Filters -->
     <div class="flex flex-col sm:flex-row gap-3">
-      <div class="flex rounded-lg border border-black/10 overflow-hidden">
-        <button onclick={() => viewMode = 'traits'} class="px-4 py-2 text-xs font-medium transition-colors {viewMode === 'traits' ? 'bg-blue-50 text-blue-700' : 'text-[var(--color-text-secondary)] hover:bg-black/[0.02]'}">Traits</button>
-        <button onclick={() => viewMode = 'variants'} class="px-4 py-2 text-xs font-medium transition-colors border-l border-black/10 {viewMode === 'variants' ? 'bg-blue-50 text-blue-700' : 'text-[var(--color-text-secondary)] hover:bg-black/[0.02]'}">Variants</button>
-      </div>
       <div class="flex-1 relative">
         <svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-tertiary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
         <input type="text" bind:value={search} placeholder="Search traits or genes..." class="w-full pl-10 pr-4 py-2 rounded-lg border border-black/10 bg-white text-sm focus:outline-none focus:border-blue-300 focus:ring-1 focus:ring-blue-200" />
@@ -255,9 +251,8 @@
       </label>
     </div>
 
-    <!-- TRAIT COMPARISON VIEW -->
-    {#if viewMode === 'traits'}
-      <p class="text-xs text-[var(--color-text-tertiary)]">{traitComparison.length} trait{traitComparison.length !== 1 ? 's' : ''}</p>
+    <!-- TRAIT COMPARISON -->
+    <p class="text-xs text-[var(--color-text-tertiary)]">{traitComparison.length} trait{traitComparison.length !== 1 ? 's' : ''}</p>
       <div class="overflow-x-auto rounded-lg border border-black/5">
         <table class="w-full text-sm">
           <thead>
@@ -294,45 +289,5 @@
         </table>
       </div>
 
-    <!-- VARIANT COMPARISON VIEW -->
-    {:else}
-      <p class="text-xs text-[var(--color-text-tertiary)]">{variantComparison.length} variant{variantComparison.length !== 1 ? 's' : ''}</p>
-      <div class="overflow-x-auto rounded-lg border border-black/5">
-        <table class="w-full text-sm">
-          <thead>
-            <tr class="bg-black/[0.02]">
-              <th class="text-left py-2.5 px-3 text-[11px] font-semibold text-[var(--color-text-tertiary)]">rsID</th>
-              <th class="text-left py-2.5 px-3 text-[11px] font-semibold text-[var(--color-text-tertiary)]">Gene</th>
-              <th class="text-left py-2.5 px-3 text-[11px] font-semibold text-[var(--color-text-tertiary)] hidden sm:table-cell">Trait</th>
-              {#each genomesVal as g}
-                <th class="text-left py-2.5 px-3 text-[11px] font-semibold" style="color: {g.color}">{g.name}</th>
-              {/each}
-            </tr>
-          </thead>
-          <tbody>
-            {#each variantComparison as snp (snp.rsid)}
-              {@const genos = genomeMatches.map(m => m.map.get(snp.rsid))}
-              {@const genotypes = genos.map(g => g?.userGenotype).filter(Boolean)}
-              {@const isDiff = new Set(genotypes).size > 1}
-              <tr class="border-t border-black/[0.03] hover:bg-black/[0.02] transition-colors {isDiff ? 'bg-amber-50/50' : ''}">
-                <td class="py-2.5 px-3 font-mono text-xs text-[var(--color-accent-blue)]">{snp.rsid}</td>
-                <td class="py-2.5 px-3 text-xs text-[var(--color-text-secondary)]">{snp.gene}</td>
-                <td class="py-2.5 px-3 text-xs text-[var(--color-text-tertiary)] hidden sm:table-cell truncate max-w-[200px]">{snp.trait}</td>
-                {#each genomesVal as g, i}
-                  {@const match = genos[i]}
-                  <td class="py-2.5 px-3">
-                    {#if match}
-                      <span class="font-mono text-xs font-semibold {riskColor(match.riskLevel)}">{match.userGenotype}</span>
-                    {:else}
-                      <span class="text-[10px] text-[var(--color-text-tertiary)]">--</span>
-                    {/if}
-                  </td>
-                {/each}
-              </tr>
-            {/each}
-          </tbody>
-        </table>
-      </div>
-    {/if}
   {/if}
 </section>
