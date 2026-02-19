@@ -5,21 +5,18 @@
   import { goto } from '$app/navigation';
   import { page } from '$app/stores';
   import { isLoaded, rawSnps, genomes, activeGenome, setActiveGenome, activeGenomeIndex } from '$lib/stores/genetic-data.js';
-  import { matchedSnps, reportsByCategory, categoryMeta, pgsResults, categoryRiskSummary, topFindings } from '$lib/stores/reports.js';
-  import { lookupSnp, getByGene, getByChromosome, searchSnps, getAllSnps } from '@telomere/snp-db';
+  import { matchedSnps, reportsByCategory, categoryMeta, pgsResults, categoryRiskSummary, topFindings, traitResults } from '$lib/stores/reports.js';
+  import { filterTraitsByCategory } from '$lib/utils/traits.js';
   import { exportMatchedSnpsCsv, exportReport } from '$lib/utils/export.js';
   import { get } from 'svelte/store';
 
   let activeSection = $state('overview');
-  let selectedSnp = $state(null);
   let searchQuery = $state('');
   let riskFilter = $state('all');
   let sortField = $state('risk');
   let sortDir = $state('desc');
-  let mobileDetailOpen = $state(false);
   let expandedChromosomes = $state(new Set());
 
-  // Data from stores
   let loaded = $state(false);
   let snpCount = $state(0);
   let matched = $state([]);
@@ -30,8 +27,8 @@
   let genomeName = $state('');
   let topFindingsVal = $state([]);
   let activeGenomeIdx = $state(0);
+  let traits = $state([]);
 
-  // Check URL params for section
   $effect(() => {
     const params = get(page).url?.searchParams;
     if (params?.get('section')) {
@@ -50,11 +47,11 @@
     riskSummary = get(categoryRiskSummary);
     topFindingsVal = get(topFindings);
     activeGenomeIdx = get(activeGenomeIndex);
+    traits = get(traitResults);
     const ag = get(activeGenome);
     genomeName = ag?.name || '';
   });
 
-  // Category map for sections
   const sectionToCat = { health: 'health', pharma: 'pharma', nutrition: 'nutrition', traits: 'traits', longevity: 'longevity', carrier: 'carrier' };
 
   const navItems = [
@@ -72,27 +69,33 @@
 
   const riskColors = { high: 'text-red-600 bg-red-50', moderate: 'text-amber-600 bg-amber-50', low: 'text-green-600 bg-green-50', carrier: 'text-blue-600 bg-blue-50', normal: 'text-green-600 bg-green-50' };
   const riskDotColors = { high: 'bg-red-500', moderate: 'bg-amber-500', low: 'bg-green-500', carrier: 'bg-blue-500', normal: 'bg-green-500' };
+  const riskCircleBg = { high: 'bg-red-100', moderate: 'bg-amber-100', low: 'bg-green-100', carrier: 'bg-blue-100', normal: 'bg-green-100' };
+  const riskCircleText = { high: 'text-red-700', moderate: 'text-amber-700', low: 'text-green-700', carrier: 'text-blue-700', normal: 'text-green-700' };
+  const riskLabelText = { high: 'Elevated', moderate: 'Moderate', low: 'Typical', carrier: 'Carrier', normal: 'Typical' };
 
-  // Computed: total risk counts
   let highCount = $derived(matched.filter(s => s.riskLevel === 'high').length);
   let modCount = $derived(matched.filter(s => s.riskLevel === 'moderate').length);
   let carrierCount = $derived(matched.filter(s => s.riskLevel === 'carrier').length);
 
-  // Current category findings
-  let currentCategoryFindings = $derived.by(() => {
-    const cat = sectionToCat[activeSection];
-    if (!cat) return [];
-    return [...(byCat[cat] || [])].sort((a, b) => (b.riskPercent || 0) - (a.riskPercent || 0));
+  // Trait counts per category for sidebar
+  let traitCountByCategory = $derived.by(() => {
+    const counts = {};
+    for (const cat of Object.keys(sectionToCat)) {
+      counts[sectionToCat[cat]] = filterTraitsByCategory(traits, sectionToCat[cat]).length;
+    }
+    return counts;
   });
 
-  // Filtered findings for category views
-  let filteredFindings = $derived.by(() => {
-    let items = currentCategoryFindings;
+  // Current category traits
+  let currentCategoryTraits = $derived.by(() => {
+    const cat = sectionToCat[activeSection];
+    if (!cat) return [];
+    let items = filterTraitsByCategory(traits, cat);
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
-      items = items.filter(s => s.rsid?.toLowerCase().includes(q) || s.gene?.toLowerCase().includes(q) || s.trait?.toLowerCase().includes(q));
+      items = items.filter(t => t.name?.toLowerCase().includes(q) || t.genes?.some(g => g.toLowerCase().includes(q)));
     }
-    if (riskFilter !== 'all') items = items.filter(s => s.riskLevel === riskFilter);
+    if (riskFilter !== 'all') items = items.filter(t => t.riskLevel === riskFilter);
     return items;
   });
 
@@ -116,7 +119,6 @@
     return items;
   });
 
-  // Chromosome grouped findings
   let chromosomeGroups = $derived.by(() => {
     const groups = {};
     for (const snp of matched) {
@@ -130,16 +132,6 @@
     if (groups['Y']) ordered.push({ chr: 'Y', snps: groups['Y'] });
     return ordered;
   });
-
-  function selectSnp(snp) {
-    selectedSnp = snp;
-    mobileDetailOpen = true;
-  }
-
-  function closeDetail() {
-    selectedSnp = null;
-    mobileDetailOpen = false;
-  }
 
   function toggleSort(field) {
     if (sortField === field) sortDir = sortDir === 'asc' ? 'desc' : 'asc';
@@ -155,12 +147,6 @@
   function handleExportCsv() { exportMatchedSnpsCsv(matched, genomeName); }
   function handleExportReport() { exportReport(matched, pgs, genomeName); }
 
-  // Related variants for selected SNP
-  let relatedVariants = $derived.by(() => {
-    if (!selectedSnp?.gene) return [];
-    return matched.filter(s => s.gene === selectedSnp.gene && s.rsid !== selectedSnp.rsid).slice(0, 5);
-  });
-
   const categories = ['health', 'longevity', 'nutrition', 'pharma', 'traits', 'carrier'];
 </script>
 
@@ -173,7 +159,6 @@
 <div class="fixed inset-0 top-16 flex bg-[var(--color-bg-primary)]">
   <!-- LEFT SIDEBAR (desktop) -->
   <aside class="hidden lg:flex flex-col w-60 bg-white border-r border-black/5 overflow-y-auto flex-shrink-0">
-    <!-- Genome switcher -->
     <div class="p-4 border-b border-black/5">
       <div class="flex items-center gap-2">
         <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background-color: {genomesVal[activeGenomeIdx]?.color || '#3B82F6'}"></span>
@@ -186,7 +171,6 @@
           </select>
         {/if}
       </div>
-      <!-- Risk summary dots -->
       <div class="flex items-center gap-3 mt-3 text-xs">
         {#if highCount > 0}<span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-red-500"></span><span class="text-red-600 font-medium">{highCount}</span></span>{/if}
         {#if modCount > 0}<span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-amber-500"></span><span class="text-amber-600 font-medium">{modCount}</span></span>{/if}
@@ -194,7 +178,6 @@
       </div>
     </div>
 
-    <!-- Search -->
     <div class="px-4 pt-3 pb-2">
       <div class="relative">
         <svg class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[var(--color-text-tertiary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
@@ -202,17 +185,16 @@
       </div>
     </div>
 
-    <!-- Nav items -->
     <nav class="flex-1 px-2 py-1">
       {#each navItems as item}
         <button
-          onclick={() => { activeSection = item.id; selectedSnp = null; riskFilter = 'all'; }}
+          onclick={() => { activeSection = item.id; riskFilter = 'all'; }}
           class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors {activeSection === item.id ? 'bg-blue-50 text-blue-700 font-medium' : 'text-[var(--color-text-secondary)] hover:bg-black/[0.02]'}"
         >
           <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={item.icon}/></svg>
           <span class="truncate">{item.label}</span>
-          {#if sectionToCat[item.id] && byCat[sectionToCat[item.id]]}
-            <span class="ml-auto text-[10px] text-[var(--color-text-tertiary)]">{byCat[sectionToCat[item.id]].length}</span>
+          {#if sectionToCat[item.id] && traitCountByCategory[sectionToCat[item.id]] != null}
+            <span class="ml-auto text-[10px] text-[var(--color-text-tertiary)]">{traitCountByCategory[sectionToCat[item.id]]}</span>
           {/if}
         </button>
       {/each}
@@ -224,7 +206,7 @@
     <div class="flex items-center gap-1 px-3 py-2 min-w-max">
       {#each navItems as item}
         <button
-          onclick={() => { activeSection = item.id; selectedSnp = null; riskFilter = 'all'; }}
+          onclick={() => { activeSection = item.id; riskFilter = 'all'; }}
           class="px-3 py-1.5 rounded-full text-xs whitespace-nowrap transition-colors {activeSection === item.id ? 'bg-blue-50 text-blue-700 font-medium' : 'text-[var(--color-text-secondary)] hover:bg-black/[0.02]'}"
         >{item.label}</button>
       {/each}
@@ -237,18 +219,17 @@
 
       <!-- OVERVIEW -->
       {#if activeSection === 'overview'}
-        <!-- Stats -->
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <div class="card text-center !p-4">
             <p class="text-2xl font-bold gradient-text">{snpCount.toLocaleString()}</p>
             <p class="text-[11px] text-[var(--color-text-tertiary)] mt-1">Variants Analyzed</p>
           </div>
           <div class="card text-center !p-4">
-            <p class="text-2xl font-bold text-[var(--color-accent-blue)]">{matched.length}</p>
-            <p class="text-[11px] text-[var(--color-text-tertiary)] mt-1">SNPs Matched</p>
+            <p class="text-2xl font-bold text-[var(--color-accent-blue)]">{traits.length}</p>
+            <p class="text-[11px] text-[var(--color-text-tertiary)] mt-1">Traits Identified</p>
           </div>
           <div class="card text-center !p-4">
-            <p class="text-2xl font-bold text-[var(--color-accent-amber)]">{highCount + modCount}</p>
+            <p class="text-2xl font-bold text-[var(--color-accent-amber)]">{traits.filter(t => t.riskLevel === 'high' || t.riskLevel === 'moderate').length}</p>
             <p class="text-[11px] text-[var(--color-text-tertiary)] mt-1">Risk Factors</p>
           </div>
           <div class="card text-center !p-4">
@@ -257,7 +238,6 @@
           </div>
         </div>
 
-        <!-- PGS Preview -->
         {#if pgs.length > 0}
           <div class="space-y-3">
             <h2 class="text-sm font-semibold text-[var(--color-text-primary)]">Polygenic Risk Scores</h2>
@@ -284,22 +264,29 @@
           </div>
         {/if}
 
-        <!-- Top findings -->
-        {#if topFindingsVal.length > 0}
+        <!-- Top Traits (instead of top findings) -->
+        {#if traits.length > 0}
           <div class="space-y-3">
             <h2 class="text-sm font-semibold text-[var(--color-text-primary)]">Top Findings</h2>
             <div class="space-y-1">
-              {#each topFindingsVal as snp}
-                <button onclick={() => selectSnp(snp)} class="card w-full text-left !p-3 flex items-center gap-3 {selectedSnp?.rsid === snp.rsid ? 'bg-blue-50/50' : ''}">
-                  <span class="w-2.5 h-2.5 rounded-full flex-shrink-0 {riskDotColors[snp.riskLevel] || 'bg-gray-400'}"></span>
-                  <div class="flex-1 min-w-0">
-                    <p class="text-sm font-medium text-[var(--color-text-primary)] truncate">{snp.trait}</p>
-                    <p class="text-[11px] text-[var(--color-text-tertiary)]">{snp.gene} · {snp.rsid}</p>
+              {#each traits.slice(0, 8) as trait}
+                <a href="/analysis/{trait.id}" class="block">
+                  <div class="flex items-center gap-4 py-3 px-4 rounded-lg hover:bg-black/[0.02] transition-colors">
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 {riskCircleBg[trait.riskLevel] || 'bg-gray-100'}">
+                      <span class="text-sm font-bold {riskCircleText[trait.riskLevel] || 'text-gray-700'}">{trait.snpCount}</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <h3 class="text-sm font-medium text-[var(--color-text-primary)]">{trait.name}</h3>
+                      <p class="text-[11px] text-[var(--color-text-tertiary)] mt-0.5">
+                        {trait.genes.join(', ')} · {trait.snpCount} variant{trait.snpCount !== 1 ? 's' : ''}
+                      </p>
+                    </div>
+                    <div class="text-right flex-shrink-0">
+                      <span class="text-xs font-medium {riskCircleText[trait.riskLevel] || 'text-gray-600'}">{riskLabelText[trait.riskLevel] || trait.riskLevel}</span>
+                    </div>
+                    <svg class="w-4 h-4 text-[var(--color-text-tertiary)] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                   </div>
-                  <span class="text-[10px] font-medium px-2 py-0.5 rounded-full {riskColors[snp.riskLevel] || 'text-gray-600 bg-gray-50'}">{snp.riskLevel}</span>
-                  <span class="text-xs font-mono text-[var(--color-text-secondary)]">{snp.userGenotype}</span>
-                  <svg class="w-4 h-4 text-[var(--color-text-tertiary)] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                </button>
+                </a>
               {/each}
             </div>
           </div>
@@ -318,7 +305,7 @@
                     </div>
                     <div class="flex-1 min-w-0">
                       <p class="text-xs font-semibold text-[var(--color-text-primary)] truncate">{categoryMeta[cat].title}</p>
-                      <p class="text-[10px] text-[var(--color-text-tertiary)]">{(byCat[cat] || []).length} findings</p>
+                      <p class="text-[10px] text-[var(--color-text-tertiary)]">{traitCountByCategory[cat] || 0} traits</p>
                     </div>
                   </div>
                   {#if riskSummary[cat]}
@@ -332,7 +319,6 @@
           </div>
         </div>
 
-        <!-- Export -->
         <div class="flex items-center gap-3">
           <button onclick={handleExportCsv} class="text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors flex items-center gap-1.5 px-3 py-2 rounded-lg border border-black/10">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h4a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
@@ -344,7 +330,7 @@
           </button>
         </div>
 
-      <!-- CATEGORY VIEWS -->
+      <!-- CATEGORY VIEWS (now trait-centric) -->
       {:else if sectionToCat[activeSection]}
         <div class="space-y-4">
           <div>
@@ -352,29 +338,34 @@
             <p class="text-xs text-[var(--color-text-tertiary)] mt-1">{categoryMeta[sectionToCat[activeSection]]?.description || ''}</p>
           </div>
 
-          <!-- Filter pills -->
           <div class="flex items-center gap-2 flex-wrap">
-            {#each ['all', 'high', 'moderate', 'low', 'carrier'] as f}
+            {#each ['all', 'high', 'moderate', 'low'] as f}
               <button onclick={() => riskFilter = f} class="px-3 py-1 rounded-full text-xs transition-colors {riskFilter === f ? 'bg-blue-50 text-blue-700 font-medium' : 'text-[var(--color-text-secondary)] hover:bg-black/[0.02] border border-black/10'}">{f === 'all' ? 'All' : f.charAt(0).toUpperCase() + f.slice(1)}</button>
             {/each}
           </div>
 
-          <!-- Findings list -->
-          {#if filteredFindings.length === 0}
-            <p class="text-sm text-[var(--color-text-tertiary)] py-8 text-center">No findings match your filters</p>
+          {#if currentCategoryTraits.length === 0}
+            <p class="text-sm text-[var(--color-text-tertiary)] py-8 text-center">No traits match your filters</p>
           {:else}
-            <div class="space-y-1">
-              {#each filteredFindings as snp}
-                <button onclick={() => selectSnp(snp)} class="w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 transition-colors {selectedSnp?.rsid === snp.rsid ? 'bg-blue-50/50' : 'hover:bg-black/[0.02]'}">
-                  <span class="w-2.5 h-2.5 rounded-full flex-shrink-0 {riskDotColors[snp.riskLevel] || 'bg-gray-400'}"></span>
-                  <div class="flex-1 min-w-0">
-                    <p class="text-sm font-medium text-[var(--color-text-primary)] truncate">{snp.trait}</p>
-                    <p class="text-[11px] text-[var(--color-text-tertiary)]">{snp.gene} · {snp.rsid}</p>
+            <div class="space-y-0">
+              {#each currentCategoryTraits as trait}
+                <a href="/analysis/{trait.id}" class="block">
+                  <div class="flex items-center gap-4 py-4 px-4 hover:bg-black/[0.02] border-b border-black/5 transition-colors">
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 {riskCircleBg[trait.riskLevel] || 'bg-gray-100'}">
+                      <span class="text-sm font-bold {riskCircleText[trait.riskLevel] || 'text-gray-700'}">{trait.snpCount}</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <h3 class="text-sm font-medium text-[var(--color-text-primary)]">{trait.name}</h3>
+                      <p class="text-[11px] text-[var(--color-text-tertiary)] mt-0.5">
+                        {trait.genes.join(', ')} · {trait.snpCount} variant{trait.snpCount !== 1 ? 's' : ''}
+                      </p>
+                    </div>
+                    <div class="text-right flex-shrink-0">
+                      <span class="text-xs font-medium {riskCircleText[trait.riskLevel] || 'text-gray-600'}">{riskLabelText[trait.riskLevel] || trait.riskLevel}</span>
+                    </div>
+                    <svg class="w-4 h-4 text-[var(--color-text-tertiary)] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                   </div>
-                  <span class="text-[10px] font-medium px-2 py-0.5 rounded-full {riskColors[snp.riskLevel] || 'text-gray-600 bg-gray-50'}">{snp.riskLevel}</span>
-                  <span class="text-xs font-mono text-[var(--color-text-secondary)]">{snp.userGenotype}</span>
-                  <svg class="w-4 h-4 text-[var(--color-text-tertiary)] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                </button>
+                </a>
               {/each}
             </div>
           {/if}
@@ -390,7 +381,7 @@
           {:else}
             <div class="space-y-2">
               {#each pgs as result}
-                <button onclick={() => { selectedSnp = { rsid: result.pgsId || result.trait, trait: result.trait, gene: 'PGS', riskLevel: result.percentile >= 70 ? 'high' : result.percentile >= 30 ? 'moderate' : 'low', userGenotype: result.percentile + 'th percentile', riskPercent: result.percentile, description: result.description, category: result.category, pgsData: result }; mobileDetailOpen = true; }} class="card w-full text-left !p-4 space-y-2">
+                <div class="card w-full text-left !p-4 space-y-2">
                   <div class="flex items-center justify-between">
                     <div>
                       <p class="text-sm font-semibold text-[var(--color-text-primary)]">{result.trait}</p>
@@ -407,7 +398,7 @@
                       <div class="h-full rounded-full transition-all {result.percentile >= 70 ? 'bg-red-500' : result.percentile >= 30 ? 'bg-amber-500' : 'bg-green-500'}" style="width: {result.percentile}%"></div>
                     </div>
                   </div>
-                </button>
+                </div>
               {/each}
             </div>
           {/if}
@@ -430,12 +421,12 @@
               {#if expandedChromosomes.has(group.chr)}
                 <div class="border-t border-black/5">
                   {#each group.snps as snp}
-                    <button onclick={() => selectSnp(snp)} class="w-full text-left px-4 py-2.5 flex items-center gap-3 hover:bg-black/[0.02] transition-colors border-b border-black/[0.03] last:border-0 {selectedSnp?.rsid === snp.rsid ? 'bg-blue-50/50' : ''}">
+                    <div class="w-full text-left px-4 py-2.5 flex items-center gap-3 hover:bg-black/[0.02] transition-colors border-b border-black/[0.03] last:border-0">
                       <span class="w-2 h-2 rounded-full flex-shrink-0 {riskDotColors[snp.riskLevel] || 'bg-gray-400'}"></span>
                       <span class="text-xs font-mono text-[var(--color-text-secondary)] w-24 flex-shrink-0">{snp.rsid}</span>
                       <span class="text-xs text-[var(--color-text-primary)] flex-1 truncate">{snp.trait}</span>
                       <span class="text-[10px] font-medium px-2 py-0.5 rounded-full {riskColors[snp.riskLevel] || 'text-gray-600 bg-gray-50'}">{snp.riskLevel}</span>
-                    </button>
+                    </div>
                   {/each}
                 </div>
               {/if}
@@ -468,7 +459,7 @@
               </thead>
               <tbody>
                 {#each allVariants as snp}
-                  <tr onclick={() => selectSnp(snp)} class="border-t border-black/[0.03] cursor-pointer hover:bg-black/[0.02] transition-colors {selectedSnp?.rsid === snp.rsid ? 'bg-blue-50/50' : ''}">
+                  <tr class="border-t border-black/[0.03] hover:bg-black/[0.02] transition-colors">
                     <td class="px-3 py-2 font-mono text-xs text-[var(--color-accent-blue)]">{snp.rsid}</td>
                     <td class="px-3 py-2 text-xs text-[var(--color-text-primary)]">{snp.gene}</td>
                     <td class="px-3 py-2 text-xs text-[var(--color-text-primary)] max-w-48 truncate">{snp.trait}</td>
@@ -484,171 +475,5 @@
       {/if}
     </div>
   </main>
-
-  <!-- RIGHT SIDEBAR (desktop) -->
-  <aside class="hidden lg:flex flex-col w-80 bg-white border-l border-black/5 overflow-y-auto flex-shrink-0">
-    {#if selectedSnp}
-      <div class="p-4 space-y-5">
-        <!-- Close -->
-        <div class="flex items-start justify-between">
-          <div class="flex-1 min-w-0">
-            <h3 class="text-base font-semibold text-[var(--color-text-primary)]">{selectedSnp.trait}</h3>
-            <p class="text-xs text-[var(--color-text-tertiary)] mt-0.5">{selectedSnp.gene} · {selectedSnp.rsid}</p>
-          </div>
-          <button onclick={closeDetail} class="p-1 rounded-lg hover:bg-black/[0.04] text-[var(--color-text-tertiary)]">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-          </button>
-        </div>
-
-        <!-- Result box -->
-        <div class="rounded-lg p-3 {riskColors[selectedSnp.riskLevel] || 'text-gray-600 bg-gray-50'} border border-current/10">
-          <div class="flex items-center justify-between">
-            <span class="text-sm font-bold">{selectedSnp.userGenotype}</span>
-            <span class="text-xs font-semibold uppercase">{selectedSnp.riskLevel}</span>
-          </div>
-          {#if selectedSnp.description}
-            <p class="text-xs mt-2 opacity-80">{selectedSnp.description}</p>
-          {/if}
-        </div>
-
-        <!-- What this means -->
-        {#if selectedSnp.riskDescription || selectedSnp.heterozygousDescription || selectedSnp.normalDescription}
-          <div class="space-y-2">
-            <h4 class="text-xs font-semibold text-[var(--color-text-primary)]">What this means</h4>
-            {#if selectedSnp.riskDescription}
-              <div class="text-xs text-[var(--color-text-secondary)] leading-relaxed">
-                <span class="font-medium text-red-600">Risk: </span>{selectedSnp.riskDescription}
-              </div>
-            {/if}
-            {#if selectedSnp.heterozygousDescription}
-              <div class="text-xs text-[var(--color-text-secondary)] leading-relaxed">
-                <span class="font-medium text-amber-600">Heterozygous: </span>{selectedSnp.heterozygousDescription}
-              </div>
-            {/if}
-            {#if selectedSnp.normalDescription}
-              <div class="text-xs text-[var(--color-text-secondary)] leading-relaxed">
-                <span class="font-medium text-green-600">Normal: </span>{selectedSnp.normalDescription}
-              </div>
-            {/if}
-          </div>
-        {/if}
-
-        <!-- Variant details -->
-        <div class="space-y-2">
-          <h4 class="text-xs font-semibold text-[var(--color-text-primary)]">Variant Details</h4>
-          <div class="grid grid-cols-2 gap-2 text-xs">
-            {#if selectedSnp.gene}<div><span class="text-[var(--color-text-tertiary)]">Gene</span><p class="font-medium">{selectedSnp.gene}</p></div>{/if}
-            {#if selectedSnp.chromosome}<div><span class="text-[var(--color-text-tertiary)]">Chromosome</span><p class="font-medium">{selectedSnp.chromosome}</p></div>{/if}
-            {#if selectedSnp.position}<div><span class="text-[var(--color-text-tertiary)]">Position</span><p class="font-mono">{selectedSnp.position}</p></div>{/if}
-            {#if selectedSnp.riskAllele}<div><span class="text-[var(--color-text-tertiary)]">Risk Allele</span><p class="font-medium text-red-600">{selectedSnp.riskAllele}</p></div>{/if}
-            {#if selectedSnp.normalAllele}<div><span class="text-[var(--color-text-tertiary)]">Normal Allele</span><p class="font-medium text-green-600">{selectedSnp.normalAllele}</p></div>{/if}
-            {#if selectedSnp.significance}<div><span class="text-[var(--color-text-tertiary)]">Significance</span><p class="font-medium">{selectedSnp.significance}</p></div>{/if}
-          </div>
-        </div>
-
-        <!-- Associated conditions -->
-        {#if selectedSnp.conditions?.length}
-          <div class="space-y-2">
-            <h4 class="text-xs font-semibold text-[var(--color-text-primary)]">Associated Conditions</h4>
-            <div class="flex flex-wrap gap-1.5">
-              {#each selectedSnp.conditions as cond}
-                <span class="text-[10px] px-2 py-0.5 rounded-full bg-black/[0.04] text-[var(--color-text-secondary)]">{cond}</span>
-              {/each}
-            </div>
-          </div>
-        {/if}
-
-        <!-- Population frequency -->
-        {#if selectedSnp.populationFrequencies}
-          <div class="space-y-2">
-            <h4 class="text-xs font-semibold text-[var(--color-text-primary)]">Population Frequency</h4>
-            {#each Object.entries(selectedSnp.populationFrequencies) as [pop, freq]}
-              <div class="flex items-center gap-2 text-xs">
-                <span class="w-16 text-[var(--color-text-tertiary)] truncate">{pop}</span>
-                <div class="flex-1 h-1.5 rounded-full bg-black/5 overflow-hidden">
-                  <div class="h-full rounded-full bg-blue-400" style="width: {Math.min(freq * 100, 100)}%"></div>
-                </div>
-                <span class="text-[var(--color-text-secondary)] w-10 text-right">{(freq * 100).toFixed(1)}%</span>
-              </div>
-            {/each}
-          </div>
-        {/if}
-
-        <!-- Related variants -->
-        {#if relatedVariants.length > 0}
-          <div class="space-y-2">
-            <h4 class="text-xs font-semibold text-[var(--color-text-primary)]">Related Variants ({selectedSnp.gene})</h4>
-            {#each relatedVariants as rv}
-              <button onclick={() => selectSnp(rv)} class="w-full text-left px-3 py-2 rounded-lg hover:bg-black/[0.02] flex items-center gap-2 text-xs transition-colors">
-                <span class="w-2 h-2 rounded-full {riskDotColors[rv.riskLevel] || 'bg-gray-400'}"></span>
-                <span class="font-mono text-[var(--color-accent-blue)]">{rv.rsid}</span>
-                <span class="flex-1 truncate text-[var(--color-text-secondary)]">{rv.trait}</span>
-                <span class="text-[10px] font-medium px-1.5 py-0.5 rounded-full {riskColors[rv.riskLevel] || 'text-gray-600 bg-gray-50'}">{rv.riskLevel}</span>
-              </button>
-            {/each}
-          </div>
-        {/if}
-
-        <!-- Research links -->
-        <div class="space-y-2">
-          <h4 class="text-xs font-semibold text-[var(--color-text-primary)]">Research</h4>
-          <div class="flex flex-wrap gap-2">
-            {#if selectedSnp.rsid && selectedSnp.rsid.startsWith('rs')}
-              <a href="https://www.ncbi.nlm.nih.gov/snp/{selectedSnp.rsid}" target="_blank" rel="noopener" class="text-[11px] text-[var(--color-accent-blue)] hover:underline flex items-center gap-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-                dbSNP
-              </a>
-              <a href="https://www.snpedia.com/index.php/{selectedSnp.rsid}" target="_blank" rel="noopener" class="text-[11px] text-[var(--color-accent-blue)] hover:underline flex items-center gap-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-                SNPedia
-              </a>
-              <a href="https://www.ncbi.nlm.nih.gov/clinvar/?term={selectedSnp.rsid}" target="_blank" rel="noopener" class="text-[11px] text-[var(--color-accent-blue)] hover:underline flex items-center gap-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-                ClinVar
-              </a>
-            {/if}
-          </div>
-        </div>
-      </div>
-    {:else}
-      <div class="flex-1 flex flex-col items-center justify-center p-6 text-center">
-        <svg class="w-12 h-12 text-[var(--color-text-tertiary)] mb-3 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-        <p class="text-sm text-[var(--color-text-tertiary)]">Select a finding to see details</p>
-        <p class="text-xs text-[var(--color-text-tertiary)] mt-2 opacity-60">{matched.length} total variants matched</p>
-      </div>
-    {/if}
-  </aside>
-
-  <!-- MOBILE DETAIL OVERLAY -->
-  {#if mobileDetailOpen && selectedSnp}
-    <div class="lg:hidden fixed inset-0 z-50">
-      <button onclick={closeDetail} class="absolute inset-0 bg-black/30"></button>
-      <div class="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl max-h-[80vh] overflow-y-auto p-4 space-y-4">
-        <div class="flex items-start justify-between">
-          <div>
-            <h3 class="text-base font-semibold text-[var(--color-text-primary)]">{selectedSnp.trait}</h3>
-            <p class="text-xs text-[var(--color-text-tertiary)]">{selectedSnp.gene} · {selectedSnp.rsid}</p>
-          </div>
-          <button onclick={closeDetail} class="p-1 rounded-lg hover:bg-black/[0.04]">
-            <svg class="w-5 h-5 text-[var(--color-text-tertiary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-          </button>
-        </div>
-        <div class="rounded-lg p-3 {riskColors[selectedSnp.riskLevel] || 'text-gray-600 bg-gray-50'}">
-          <div class="flex items-center justify-between">
-            <span class="text-sm font-bold">{selectedSnp.userGenotype}</span>
-            <span class="text-xs font-semibold uppercase">{selectedSnp.riskLevel}</span>
-          </div>
-          {#if selectedSnp.description}<p class="text-xs mt-2 opacity-80">{selectedSnp.description}</p>{/if}
-        </div>
-        {#if selectedSnp.rsid && selectedSnp.rsid.startsWith('rs')}
-          <div class="flex gap-3">
-            <a href="https://www.ncbi.nlm.nih.gov/snp/{selectedSnp.rsid}" target="_blank" rel="noopener" class="text-xs text-[var(--color-accent-blue)] hover:underline">dbSNP</a>
-            <a href="https://www.snpedia.com/index.php/{selectedSnp.rsid}" target="_blank" rel="noopener" class="text-xs text-[var(--color-accent-blue)] hover:underline">SNPedia</a>
-            <a href="https://www.ncbi.nlm.nih.gov/clinvar/?term={selectedSnp.rsid}" target="_blank" rel="noopener" class="text-xs text-[var(--color-accent-blue)] hover:underline">ClinVar</a>
-          </div>
-        {/if}
-      </div>
-    </div>
-  {/if}
 </div>
 {/if}

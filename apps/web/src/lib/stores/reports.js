@@ -2,6 +2,7 @@ import { derived } from 'svelte/store';
 import { rawSnps } from './genetic-data.js';
 import { matchSnps } from '@telomere/snp-db';
 import { calculateAllPGS } from '@telomere/pgs';
+import { buildTraits } from '$lib/utils/traits.js';
 
 export const matchedSnps = derived(rawSnps, ($snps) => {
   if ($snps.size === 0) return [];
@@ -41,6 +42,11 @@ export const categoryRiskSummary = derived(reportsByCategory, ($cats) => {
     summary[cat] = { avgRisk: Math.round(avgRisk), highCount, modCount, carrierCount, total: snps.length };
   }
   return summary;
+});
+
+export const traitResults = derived(matchedSnps, ($matched) => {
+  if ($matched.length === 0) return [];
+  return buildTraits($matched);
 });
 
 export const categoryMeta = {
