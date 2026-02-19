@@ -1,39 +1,14 @@
-const PGS_API = 'https://www.pgscatalog.org/rest';
-
 /**
- * Search PGS Catalog for scoring files by trait
+ * @telomere/pgs — Polygenic Risk Score Calculator
+ * 
+ * All data is bundled locally. No external API calls at runtime.
+ * Scoring files are pre-downloaded from PGS Catalog and included in the app.
+ * 
+ * To add new scoring files:
+ *   1. Download from https://www.pgscatalog.org/
+ *   2. Place TSV in packages/pgs/data/
+ *   3. Import via parseScoringFile()
  */
-export async function searchScores(traitQuery) {
-  const res = await fetch(`${PGS_API}/score/search?q=${encodeURIComponent(traitQuery)}&limit=10`);
-  if (!res.ok) return [];
-  const data = await res.json();
-  return (data.results || []).map(score => ({
-    id: score.id,
-    name: score.name,
-    trait: score.trait_reported,
-    variantCount: score.variants_number,
-    publicationTitle: score.publication?.title,
-    pmid: score.publication?.pmid,
-    ftp: score.ftp_scoring_file,
-  }));
-}
-
-/**
- * Fetch metadata for a specific PGS score
- */
-export async function getScoreMetadata(pgsId) {
-  const res = await fetch(`${PGS_API}/score/${pgsId}`);
-  if (!res.ok) return null;
-  const data = await res.json();
-  return {
-    id: data.id,
-    name: data.name,
-    trait: data.trait_reported,
-    variantCount: data.variants_number,
-    scoringFileUrl: data.ftp_scoring_file,
-    publication: data.publication,
-  };
-}
 
 /**
  * Parse a PGS Catalog scoring file (TSV with # header comments)

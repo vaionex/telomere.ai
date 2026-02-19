@@ -19,15 +19,9 @@ importers:
       '@tauri-apps/plugin-fs':
         specifier: ^2.0.0
         version: 2.4.5
-      '@telomere/annotations':
-        specifier: workspace:*
-        version: link:../../packages/annotations
       '@telomere/parsers':
         specifier: workspace:*
         version: link:../../packages/parsers
-      '@telomere/pgs':
-        specifier: workspace:*
-        version: link:../../packages/pgs
       '@telomere/snp-db':
         specifier: workspace:*
         version: link:../../packages/snp-db
@@ -56,8 +50,6 @@ importers:
       vite:
         specifier: ^6.0.0
         version: 6.4.1(jiti@2.6.1)(lightningcss@1.31.1)
-
-  packages/annotations: {}
 
   packages/parsers: {}
 

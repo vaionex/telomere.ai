@@ -23,8 +23,6 @@
     "@tauri-apps/plugin-dialog": "^2.0.0",
     "@tauri-apps/plugin-fs": "^2.0.0",
     "@telomere/parsers": "workspace:*",
-    "@telomere/annotations": "workspace:*",
-    "@telomere/pgs": "workspace:*",
     "@telomere/snp-db": "workspace:*"
   }
 }

@@ -63,14 +63,28 @@
         Your DNA stays on your computer. Always.
       </p>
       <div class="flex flex-col sm:flex-row items-center gap-4">
-        <a href="/upload" class="btn-primary text-lg px-8 py-4 glow-cyan">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
-          Open File
+        <a href="/download" class="btn-primary text-lg px-8 py-4 glow-cyan">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+          Download for Free
         </a>
         <a href="#how-it-works" class="text-text-secondary hover:text-text-primary transition-colors flex items-center gap-2">
           Learn More
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
         </a>
+      </div>
+      <div class="flex items-center gap-6 mt-6 text-text-tertiary text-sm">
+        <span class="flex items-center gap-1.5">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.9-1.801"/></svg>
+          Windows
+        </span>
+        <span class="flex items-center gap-1.5">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+          macOS
+        </span>
+        <span class="flex items-center gap-1.5">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M20.581 19.049c-.55-.446-.336-1.431-.907-2.086-.511-.583-.254-1.533-.683-2.186-.41-.624-.764-.504-1.019-1.263-.287-.853.244-1.498-.108-2.345-.346-.832-.932-1.002-.978-1.953-.046-.941.686-1.396.603-2.338-.085-.946-.758-1.348-.89-2.29-.13-.934.378-1.56.164-2.51-.125-.539-.339-.89-.522-1.078H4.562c-.183.188-.397.539-.522 1.078-.214.95.294 1.576.164 2.51-.132.942-.805 1.344-.89 2.29-.083.942.649 1.397.603 2.338-.046.951-.632 1.121-.978 1.953-.352.847.179 1.492-.108 2.345-.255.759-.609.639-1.019 1.263-.429.653-.172 1.603-.683 2.186-.571.655-.357 1.64-.907 2.086-.521.422-.294 1.228-.294 1.951s-.227 1.529.294 1.951c.55.446.336 1.431.907 2.086.511.583.254 1.533.683 2.186.41.624.764.504 1.019 1.263.287.853-.244 1.498.108 2.345.346.832.932 1.002.978 1.953.046.941-.686 1.396-.603 2.338.085.946.758 1.348.89 2.29.044.312-.003.616-.075.904h14.876c-.072-.288-.119-.592-.075-.904.132-.942.805-1.344.89-2.29.083-.942-.649-1.397-.603-2.338.046-.951.632-1.121.978-1.953.352-.847-.179-1.492.108-2.345.255-.759.609-.639 1.019-1.263.429-.653.172-1.603.683-2.186.571-.655.357-1.64.907-2.086.521-.422.294-1.228.294-1.951s.227-1.529-.294-1.951z"/></svg>
+          Linux
+        </span>
       </div>
     </div>
     <div class="flex-shrink-0 hidden lg:flex items-center justify-center">
@@ -247,9 +261,9 @@
     <div class="card p-12 glow-border">
       <h2 class="text-3xl sm:text-4xl font-bold mb-4">Ready to Decode Your DNA?</h2>
       <p class="text-text-secondary mb-8 max-w-xl mx-auto">Open your genetic data file and unlock comprehensive health insights. It takes less than 30 seconds.</p>
-      <a href="/upload" class="btn-primary text-lg px-8 py-4 glow-cyan">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
-        Open File — It's Free
+      <a href="/download" class="btn-primary text-lg px-8 py-4 glow-cyan">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+        Download — It's Free
       </a>
     </div>
   </div>

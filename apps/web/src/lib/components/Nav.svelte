@@ -19,7 +19,10 @@
         <a href="/#reports" class="text-text-secondary hover:text-text-primary transition-colors text-sm">Reports</a>
         <a href="/explore" class="text-text-secondary hover:text-text-primary transition-colors text-sm">SNP Explorer</a>
         <a href="/about" class="text-text-secondary hover:text-text-primary transition-colors text-sm">About</a>
-        <a href="/upload" class="btn-primary text-sm !py-2 !px-4">Upload DNA</a>
+        <a href="/download" class="btn-primary text-sm !py-2 !px-4">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+          Download
+        </a>
       </div>
 
       <button class="md:hidden text-text-secondary" onclick={() => mobileOpen = !mobileOpen}>
@@ -41,7 +44,7 @@
         <a href="/#reports" class="block text-text-secondary hover:text-text-primary py-2" onclick={() => mobileOpen = false}>Reports</a>
         <a href="/explore" class="block text-text-secondary hover:text-text-primary py-2" onclick={() => mobileOpen = false}>SNP Explorer</a>
         <a href="/about" class="block text-text-secondary hover:text-text-primary py-2" onclick={() => mobileOpen = false}>About</a>
-        <a href="/upload" class="btn-primary text-sm text-center block" onclick={() => mobileOpen = false}>Upload DNA</a>
+        <a href="/download" class="btn-primary text-sm text-center block" onclick={() => mobileOpen = false}>Download</a>
       </div>
     </div>
   {/if}
