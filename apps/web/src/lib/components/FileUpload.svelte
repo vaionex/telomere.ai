@@ -1,12 +1,13 @@
 <script>
   import { parseGeneticFile, parseVcfStream, shouldUseStreaming, detectFormatByExtension } from '@telomere/parsers';
-  import { SNP_MAP, lookupSnp } from '@telomere/snp-db';
+  import { SNP_MAP } from '@telomere/snp-db';
   import { addGenome } from '$lib/stores/genetic-data.js';
   import { goto } from '$app/navigation';
   import GenomeNamePrompt from './GenomeNamePrompt.svelte';
+  import LiveResults from './LiveResults.svelte';
 
   let dragover = $state(false);
-  let phase = $state('idle'); // idle | reading | parsing | streaming | matching | naming | error
+  let phase = $state('idle'); // idle | reading | parsing | streaming | matching | naming | streaming-done | error
   let progress = $state(0);
   let snpsFound = $state(0);
   let errorMsg = $state('');
@@ -18,7 +19,6 @@
   let streamStartTime = $state(0);
   let estimatedTotal = $state(0);
   let liveMatches = $state([]);
-  let liveCategoryCounts = $state({});
 
   $effect(() => {
     isTauri = typeof window !== 'undefined' && !!window.__TAURI_INTERNALS__;
@@ -27,30 +27,15 @@
   // Build SNP filter set from the snp-db for streaming optimization
   const snpFilterSet = new Set(SNP_MAP.keys());
 
-  function getRiskLevel(dbEntry, genotype) {
-    if (!dbEntry.riskAllele) return 'normal';
-    const alleles = genotype.split('');
-    const riskCount = alleles.filter(a => a === dbEntry.riskAllele).length;
-    if (riskCount >= 2) return 'high';
-    if (riskCount === 1) return 'moderate';
-    return 'normal';
-  }
-
-  const riskColors = { high: 'text-red-600 bg-red-50', moderate: 'text-amber-600 bg-amber-50', normal: 'text-green-600 bg-green-50' };
-  const riskLabels = { high: 'High Risk', moderate: 'Moderate', normal: 'Normal' };
-  const categoryIcons = { health: 'H', longevity: 'L', nutrition: 'N', pharma: 'Rx', traits: 'T', carrier: 'C' };
-
   async function processContent(text, name) {
     errorMsg = '';
     fileName = name;
     
     try {
-      // Phase 1: Reading
       phase = 'reading';
       progress = 15;
       await tick(150);
 
-      // Phase 2: Parsing
       phase = 'parsing';
       progress = 40;
       await tick(100);
@@ -60,12 +45,10 @@
       progress = 70;
       await tick(200);
 
-      // Phase 3: Matching
       phase = 'matching';
       progress = 85;
       await tick(300);
 
-      // Store parsed data, show naming prompt
       parsedSnps = result.snps;
       parsedMeta = {
         format: result.format,
@@ -87,15 +70,13 @@
   async function processStream(file) {
     errorMsg = '';
     fileName = file.name;
+    liveMatches = [];
 
     try {
       phase = 'streaming';
       progress = 5;
       streamVariants = 0;
       streamStartTime = Date.now();
-      liveMatches = [];
-      liveCategoryCounts = {};
-      // Estimate total variants based on file size (~1 variant per 200 bytes for compressed, ~200 bytes for raw)
       const isGz = file.name.endsWith('.gz') || file.name.endsWith('.bgz');
       estimatedTotal = Math.round(file.size / (isGz ? 60 : 200));
 
@@ -107,23 +88,13 @@
           progress = Math.round(pct);
         },
         onMatch(rsid, snpData) {
-          const dbEntry = lookupSnp(rsid);
-          if (!dbEntry) return;
-          snpsFound++;
-          const riskLevel = getRiskLevel(dbEntry, snpData.genotype);
-          const match = { rsid, gene: dbEntry.gene, trait: dbEntry.trait, genotype: snpData.genotype, riskLevel, categories: dbEntry.categories };
-          liveMatches = [...liveMatches, match];
-          for (const cat of dbEntry.categories) {
-            liveCategoryCounts = { ...liveCategoryCounts, [cat]: (liveCategoryCounts[cat] || 0) + 1 };
-          }
+          liveMatches = [...liveMatches, { rsid, ...snpData }];
+          snpsFound = liveMatches.length;
         }
       });
 
       streamVariants = result.metadata.totalVariants;
-      snpsFound = result.metadata.totalSnps;
-      progress = 95;
-      phase = 'matching';
-      await tick(200);
+      progress = 100;
 
       parsedSnps = result.snps;
       parsedMeta = {
@@ -135,8 +106,7 @@
         fileName: file.name
       };
 
-      progress = 100;
-      phase = 'naming';
+      phase = 'streaming-done';
     } catch (e) {
       errorMsg = e.message || 'Failed to parse file. Make sure it\'s a valid genetic data file.';
       phase = 'error';
@@ -197,7 +167,6 @@
       return;
     }
 
-    // For large files or gzipped VCFs, use streaming parser
     if (shouldUseStreaming(file)) {
       const fmt = detectFormatByExtension(file.name);
       if (fmt === 'vcf') {
@@ -226,7 +195,11 @@
     else document.getElementById('file-input')?.click();
   }
 
-  function reset() { phase = 'idle'; progress = 0; errorMsg = ''; snpsFound = 0; parsedSnps = null; parsedMeta = null; streamVariants = 0; liveMatches = []; liveCategoryCounts = {}; }
+  function reset() { phase = 'idle'; progress = 0; errorMsg = ''; snpsFound = 0; parsedSnps = null; parsedMeta = null; streamVariants = 0; liveMatches = []; }
+
+  function finishStreaming() {
+    phase = 'naming';
+  }
 
   function onNameChosen(name) {
     if (parsedSnps && parsedMeta) {
@@ -235,10 +208,13 @@
     }
   }
 
+  const isStreaming = $derived(phase === 'streaming' || phase === 'streaming-done');
+
   const phaseLabel = $derived({
     reading: 'Reading file...',
     parsing: `Parsing SNPs...`,
     streaming: `Scanning variants... ${formatNumber(streamVariants)}${estimatedTotal > 0 ? ` of ~${formatNumber(estimatedTotal)}` : ''}`,
+    'streaming-done': `Complete — ${formatNumber(streamVariants)} variants scanned`,
     matching: `Matching ${snpsFound.toLocaleString()} SNPs against database...`,
     done: 'Analysis complete!',
   }[phase] || '');
@@ -246,9 +222,51 @@
 
 <div class="space-y-6">
   {#if phase === 'naming'}
-    <!-- Naming prompt (replaces entire drop zone) -->
     <div class="rounded-2xl border border-white/10 bg-white/[0.02] p-12">
       <GenomeNamePrompt onSubmit={onNameChosen} />
+    </div>
+  {:else if isStreaming}
+    <!-- Streaming: split view with progress + live results -->
+    <div class="space-y-6">
+      <!-- Compact progress header -->
+      <div class="card space-y-3">
+        <div class="flex items-center gap-4">
+          <div class="w-10 h-10 rounded-xl glass flex items-center justify-center flex-shrink-0">
+            {#if phase === 'streaming-done'}
+              <svg class="w-5 h-5 text-accent-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+            {:else}
+              <svg class="w-5 h-5 text-accent-cyan animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611l-.772.13c-3.052.513-6.174.513-9.226 0l-.772-.13c-1.717-.293-2.3-2.379-1.067-3.61L5 14.5"/>
+              </svg>
+            {/if}
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-text-primary font-semibold text-sm">{phaseLabel}</p>
+            <p class="text-text-secondary text-xs">
+              <span class="font-mono text-accent-cyan">{fileName}</span>
+              {#if snpsFound > 0} · {snpsFound} SNPs matched{/if}
+              {#if phase === 'streaming' && getEta()} · <span class="text-text-tertiary">{getEta()}</span>{/if}
+            </p>
+          </div>
+        </div>
+        <!-- Progress bar -->
+        <div class="h-1.5 bg-white/5 rounded-full overflow-hidden">
+          <div
+            class="h-full rounded-full transition-all duration-500 ease-out {phase === 'streaming-done' ? 'bg-accent-green' : 'bg-gradient-to-r from-accent-cyan to-accent-blue'}"
+            style="width: {progress}%"
+          ></div>
+        </div>
+      </div>
+
+      <!-- Live results -->
+      <LiveResults
+        matches={liveMatches}
+        totalVariants={streamVariants}
+        done={phase === 'streaming-done'}
+        onFinish={finishStreaming}
+      />
     </div>
   {:else}
   <!-- Drop zone -->
@@ -296,9 +314,8 @@
       </div>
 
     {:else}
-      <!-- Processing states -->
+      <!-- Processing states (non-streaming) -->
       <div class="px-8 py-16 space-y-6">
-        <!-- Animated DNA icon -->
         <div class="w-20 h-20 mx-auto relative">
           {#if phase === 'done'}
             <div class="w-full h-full rounded-2xl bg-accent-green/10 flex items-center justify-center">
@@ -319,12 +336,7 @@
           <p class="text-text-primary font-semibold text-lg">{phaseLabel}</p>
           <p class="text-text-secondary text-sm mt-1">
             {#if fileName}<span class="font-mono text-accent-cyan">{fileName}</span> • {/if}
-            {#if phase === 'streaming'}
-              {snpsFound > 0 ? `${snpsFound.toLocaleString()} matched SNPs` : 'Scanning...'}
-              {#if getEta()} • <span class="text-text-tertiary">{getEta()}</span>{/if}
-            {:else if snpsFound > 0}
-              {snpsFound.toLocaleString()} SNPs found
-            {/if}
+            {#if snpsFound > 0}{snpsFound.toLocaleString()} SNPs found{/if}
           </p>
         </div>
 
@@ -337,8 +349,8 @@
             ></div>
           </div>
           <div class="flex justify-between mt-2 text-xs text-text-tertiary">
-            <span class="{phase === 'reading' || phase === 'parsing' || phase === 'streaming' || phase === 'matching' || phase === 'done' ? 'text-accent-cyan' : ''}">Read</span>
-            <span class="{phase === 'parsing' || phase === 'streaming' || phase === 'matching' || phase === 'done' ? 'text-accent-cyan' : ''}">Parse</span>
+            <span class="{phase === 'reading' || phase === 'parsing' || phase === 'matching' || phase === 'done' ? 'text-accent-cyan' : ''}">Read</span>
+            <span class="{phase === 'parsing' || phase === 'matching' || phase === 'done' ? 'text-accent-cyan' : ''}">Parse</span>
             <span class="{phase === 'matching' || phase === 'done' ? 'text-accent-cyan' : ''}">Match</span>
             <span class="{phase === 'done' ? 'text-accent-green' : ''}">Done</span>
           </div>
@@ -348,38 +360,6 @@
       </div>
     {/if}
   </button>
-
-  <!-- Live results panel (visible during streaming) -->
-  {#if phase === 'streaming' && liveMatches.length > 0}
-    <div class="space-y-4 animate-in">
-      <!-- Category counts bar -->
-      <div class="flex flex-wrap gap-2">
-        {#each Object.entries(liveCategoryCounts) as [cat, count]}
-          <span class="px-3 py-1.5 rounded-lg text-xs font-medium bg-white/80 border border-black/5 text-text-primary capitalize">
-            {cat} <span class="ml-1 text-accent-blue font-bold">{count}</span>
-          </span>
-        {/each}
-      </div>
-
-      <!-- Live match feed -->
-      <div class="max-h-80 overflow-y-auto space-y-2 pr-1">
-        {#each liveMatches.toReversed().slice(0, 30) as match (match.rsid)}
-          <div class="card !p-3 flex items-center gap-3 text-sm">
-            <span class="px-2 py-0.5 rounded text-xs font-medium {riskColors[match.riskLevel]}">
-              {riskLabels[match.riskLevel]}
-            </span>
-            <span class="font-mono text-accent-blue text-xs">{match.rsid}</span>
-            <span class="font-semibold text-text-primary">{match.gene}</span>
-            <span class="text-text-secondary text-xs truncate flex-1">{match.trait}</span>
-            <span class="font-mono text-xs text-text-tertiary">{match.genotype}</span>
-          </div>
-        {/each}
-        {#if liveMatches.length > 30}
-          <p class="text-center text-xs text-text-tertiary py-2">+ {liveMatches.length - 30} more matches...</p>
-        {/if}
-      </div>
-    </div>
-  {/if}
   {/if}
 
   <!-- Error state -->
