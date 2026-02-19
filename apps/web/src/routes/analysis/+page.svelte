@@ -119,6 +119,17 @@
     return items;
   });
 
+  // Map rsid → first matching trait id for linking
+  let snpToTraitId = $derived.by(() => {
+    const map = {};
+    for (const t of traits) {
+      for (const s of (t.snps || [])) {
+        if (!map[s.rsid]) map[s.rsid] = t.id;
+      }
+    }
+    return map;
+  });
+
   // All variants for the table view
   let allVariants = $derived.by(() => {
     let items = [...matched];
@@ -531,7 +542,7 @@
                 <tr class="border-t border-black/[0.03] hover:bg-black/[0.02] transition-colors">
                   <td class="px-3 py-2 font-mono text-xs text-[var(--color-accent-blue)]">{snp.rsid}</td>
                   <td class="px-3 py-2 text-xs text-[var(--color-text-primary)]">{snp.gene}</td>
-                  <td class="px-3 py-2 text-xs text-[var(--color-text-primary)] max-w-48 truncate">{snp.trait}</td>
+                  <td class="px-3 py-2 text-xs max-w-48 truncate">{#if snpToTraitId[snp.rsid]}<a href="/analysis/{snpToTraitId[snp.rsid]}" class="text-[var(--color-accent-blue)] hover:underline">{snp.trait}</a>{:else}<span class="text-[var(--color-text-primary)]">{snp.trait}</span>{/if}</td>
                   <td class="px-3 py-2"><span class="text-[10px] font-medium px-2 py-0.5 rounded-full {riskColors[snp.riskLevel] || 'text-gray-600 bg-gray-50'}">{snp.riskLevel}</span></td>
                   <td class="px-3 py-2 font-mono text-xs text-[var(--color-text-secondary)]">{snp.userGenotype}</td>
                 </tr>
