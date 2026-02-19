@@ -106,6 +106,19 @@
     return counts;
   });
 
+  // Global search results (across all traits)
+  let searchResults = $derived.by(() => {
+    if (!searchQuery) return [];
+    const q = searchQuery.toLowerCase();
+    return traits.filter(t =>
+      t.name?.toLowerCase().includes(q) ||
+      t.genes?.some(g => g.toLowerCase().includes(q)) ||
+      t.snps?.some(s => s.rsid?.toLowerCase().includes(q))
+    );
+  });
+
+  let isSearching = $derived(searchQuery.length > 0);
+
   // Current category traits
   let currentCategoryTraits = $derived.by(() => {
     const cat = sectionToCat[activeSection];
@@ -300,8 +313,42 @@
       </div>
     </div>
 
+    <!-- SEARCH RESULTS (shown when searching, overrides section view) -->
+    {#if isSearching}
+      <div class="space-y-4">
+        <div>
+          <h2 class="text-lg font-semibold text-[var(--color-text-primary)]">Search Results</h2>
+          <p class="text-xs text-[var(--color-text-tertiary)] mt-1">{searchResults.length} trait{searchResults.length !== 1 ? 's' : ''} matching "{searchQuery}"</p>
+        </div>
+        {#if searchResults.length === 0}
+          <p class="text-sm text-[var(--color-text-tertiary)] py-8 text-center">No traits found</p>
+        {:else}
+          <div class="space-y-0">
+            {#each searchResults as trait}
+              <a href="/analysis/{trait.id}" class="block">
+                <div class="flex items-center gap-4 py-4 px-4 hover:bg-black/[0.02] border-b border-black/5 transition-colors">
+                  <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 {riskCircleBg[trait.riskLevel] || 'bg-gray-100'}">
+                    <span class="text-sm font-bold {riskCircleText[trait.riskLevel] || 'text-gray-700'}">{trait.snpCount}</span>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <h3 class="text-sm font-medium text-[var(--color-text-primary)]">{trait.name}</h3>
+                    <p class="text-[11px] text-[var(--color-text-tertiary)] mt-0.5">
+                      {trait.genes.join(', ')} · {trait.snpCount} variant{trait.snpCount !== 1 ? 's' : ''} · {trait.categories.join(', ')}
+                    </p>
+                  </div>
+                  <div class="text-right flex-shrink-0">
+                    <span class="text-xs font-medium {riskCircleText[trait.riskLevel] || 'text-gray-600'}">{riskLabelText[trait.riskLevel] || trait.riskLevel}</span>
+                  </div>
+                  <svg class="w-4 h-4 text-[var(--color-text-tertiary)] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                </div>
+              </a>
+            {/each}
+          </div>
+        {/if}
+      </div>
+
     <!-- OVERVIEW -->
-    {#if activeSection === 'overview'}
+    {:else if activeSection === 'overview'}
       <div class="grid grid-cols-3 gap-3">
         <div class="card text-center !p-4">
           <p class="text-2xl font-bold text-[var(--color-accent-blue)]">{traits.length}</p>
