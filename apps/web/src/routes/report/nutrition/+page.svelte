@@ -38,8 +38,7 @@
 
   <div class="mt-8 rounded-xl bg-white/[0.02] border border-white/5 p-4">
     <p class="text-xs text-text-tertiary leading-relaxed">
-      <strong class="text-text-secondary">Note:</strong> These results are for informational purposes only. 
-      Having a risk variant does not mean you will develop a condition. Always consult a healthcare professional for medical advice.
+      <strong class="text-text-secondary">Showing all matched variants.</strong> Each finding includes the research basis and population frequency data so you can evaluate significance yourself. Your genome, your data, your right to see all of it.
     </p>
   </div>
 </div>

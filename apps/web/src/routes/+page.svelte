@@ -23,8 +23,8 @@
     { q: 'Is this really free?', a: 'Yes, completely free. Telomere AI is open-source software built by Vaionex. We believe genetic insights should be accessible to everyone.' },
     { q: 'Is my data safe?', a: 'Absolutely. Your genetic data is processed entirely on your computer. Nothing is ever sent to any server. The app works fully offline.' },
     { q: 'What file formats do you support?', a: '23andMe raw data (.txt), AncestryDNA (.txt), MyHeritage (.csv), and VCF 4.x files. Just download your raw data from your testing provider and open it here.' },
-    { q: 'How accurate are the results?', a: 'Our SNP database uses data from ClinVar, SNPedia, PharmGKB, and peer-reviewed GWAS studies. Each finding includes PubMed references. This is for informational purposes — always consult a healthcare provider.' },
-    { q: 'Can I use this for medical decisions?', a: 'No. Telomere AI is for educational and informational purposes only. It is not a diagnostic tool. Always consult with a qualified healthcare professional or genetic counselor.' },
+    { q: 'How accurate are the results?', a: 'Our SNP database draws from ClinVar, SNPedia, PharmGKB, and peer-reviewed GWAS studies. Every finding includes PubMed references and population frequency data so you can evaluate the evidence yourself. We show everything — nothing is filtered or hidden.' },
+    { q: 'Can I use this for medical decisions?', a: 'We show you everything. Every finding includes PubMed references and population frequency data. Unlike other tools, nothing is hidden or gated. You already have your genome file — we just make it readable so you can have informed conversations with your healthcare provider if you choose.' },
     { q: 'How does this compare to SelfDecode or Promethease?', a: 'SelfDecode costs $297/year and Promethease costs $12. We offer comparable analysis for free, with a fully offline desktop app and open-source codebase.' }
   ];
 
@@ -158,7 +158,7 @@
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="card p-8 sm:p-12 text-center glow-border">
       <h2 class="text-3xl sm:text-4xl font-bold mb-4">Your DNA, Your Computer, Your Rules</h2>
-      <p class="text-text-secondary max-w-2xl mx-auto mb-8">Telomere AI is a desktop application. Your genetic data never touches the internet.</p>
+      <p class="text-text-secondary max-w-2xl mx-auto mb-8">Telomere AI is a desktop application. Your genetic data never touches the internet — and every result is shown to you. No gatekeeping, no paywalls, no hidden findings.</p>
       <div class="grid sm:grid-cols-3 gap-8 text-left">
         <div>
           <div class="w-10 h-10 rounded-lg glass flex items-center justify-center mb-3 text-accent-cyan">🖥️</div>

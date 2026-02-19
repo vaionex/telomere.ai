@@ -33,8 +33,8 @@
     </div>
 
     <div class="card bg-accent-amber/5 border-accent-amber/20">
-      <h2 class="text-xl font-bold text-text-primary mb-3">⚠️ Disclaimer</h2>
-      <p>Telomere AI is for <strong class="text-text-primary">educational and informational purposes only</strong>. It is not a medical device, diagnostic tool, or substitute for professional genetic counseling. Always consult with a qualified healthcare provider before making health decisions based on genetic information.</p>
+      <h2 class="text-xl font-bold text-text-primary mb-3">📖 Transparency</h2>
+      <p>Telomere AI is a research tool that makes your raw genetic data readable. We show everything — no results are hidden or locked behind paywalls. All findings include their research basis so you can verify independently. <span class="text-text-tertiary">Legal note: This software is not a medical device and does not provide diagnoses.</span></p>
     </div>
   </div>
 </div>

@@ -409,9 +409,7 @@
     <!-- Disclaimer -->
     <div class="mt-12 rounded-xl bg-white/[0.02] border border-white/5 p-4">
       <p class="text-xs text-text-tertiary leading-relaxed">
-        <strong class="text-text-secondary">Disclaimer:</strong> These results are for informational and educational purposes only. 
-        Having a risk allele does not mean you will develop a condition. Genetic risk is probabilistic and influenced by many factors 
-        including environment, lifestyle, and other genes. Always consult a qualified healthcare professional or genetic counselor for medical advice.
+        <strong class="text-text-secondary">Your data, your insights.</strong> Telomere AI shows you everything we find — no results hidden, no paywalls, no gatekeeping. You already have your genome file; we just make it readable. Research references (PubMed IDs) are included so you can verify every finding.
       </p>
     </div>
   </div>
