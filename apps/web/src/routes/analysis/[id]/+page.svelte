@@ -7,6 +7,7 @@
   import { isLoaded } from '$lib/stores/genetic-data.js';
   import { traitResults } from '$lib/stores/reports.js';
   import { generateSummary } from '$lib/utils/traits.js';
+  import { getTraitDescription } from '$lib/data/trait-descriptions.js';
   import { get } from 'svelte/store';
 
   let trait = $state(null);
@@ -18,13 +19,17 @@
   const riskLabels = { high: 'Elevated Risk', moderate: 'Slightly Elevated', low: 'Typical', carrier: 'Carrier', normal: 'Typical' };
   const riskBadgeBg = { high: 'bg-red-100 text-red-700', moderate: 'bg-amber-100 text-amber-700', low: 'bg-green-100 text-green-700', carrier: 'bg-blue-100 text-blue-700', normal: 'bg-green-100 text-green-700' };
 
-  $effect(() => {
-    if (!get(isLoaded)) { goto('/upload'); return; }
+  // One-time data load from stores (cached, instant)
+  if (!get(isLoaded) && typeof window !== 'undefined') {
+    goto('/upload');
+  } else {
     const id = get(page).params.id;
     const traits = get(traitResults);
     trait = traits.find(t => t.id === id) || null;
-    if (!trait) goto('/analysis');
-  });
+    if (!trait && typeof window !== 'undefined') goto('/analysis');
+  }
+
+  let traitDescription = $derived(trait ? getTraitDescription(trait.id) : null);
 
   function toggleSnp(rsid) {
     expandedSnp = expandedSnp === rsid ? null : rsid;
@@ -100,6 +105,36 @@
       {/if}
     </div>
   </div>
+
+  <!-- Rich Description -->
+  {#if traitDescription}
+    <div class="mb-8">
+      <div class="prose prose-sm max-w-none text-[var(--color-text-secondary)] leading-relaxed
+        [&_h2]:text-base [&_h2]:font-semibold [&_h2]:text-[var(--color-text-primary)] [&_h2]:mt-6 [&_h2]:mb-3
+        [&_h3]:text-sm [&_h3]:font-semibold [&_h3]:text-[var(--color-text-primary)] [&_h3]:mt-4 [&_h3]:mb-2
+        [&_p]:mb-3 [&_p]:text-sm
+        [&_strong]:text-[var(--color-text-primary)]
+        [&_a]:text-[var(--color-accent-blue)] [&_a]:no-underline hover:[&_a]:underline
+        [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:mb-3 [&_ul]:text-sm
+        [&_li]:mb-1">
+        {@html traitDescription.details.replace(/^##\s+(.+)$/gm, '<h2>$1</h2>').replace(/^###\s+(.+)$/gm, '<h3>$1</h3>').replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>').replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>').replace(/\n\n/g, '</p><p>').replace(/^(.)/,'<p>$1').replace(/(.)$/,'$1</p>')}
+      </div>
+
+      {#if traitDescription.relatedLinks?.length > 0}
+        <div class="mt-6 pt-4 border-t border-black/5">
+          <p class="text-xs font-semibold text-[var(--color-text-tertiary)] mb-2">Related Resources</p>
+          <div class="flex flex-wrap gap-2">
+            {#each traitDescription.relatedLinks as link}
+              <a href={link.url} target="_blank" rel="noopener" class="inline-flex items-center gap-1 text-xs text-[var(--color-accent-blue)] hover:underline px-2.5 py-1.5 rounded-md border border-black/5 hover:border-blue-200 transition-colors">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                {link.text}
+              </a>
+            {/each}
+          </div>
+        </div>
+      {/if}
+    </div>
+  {/if}
 
   <!-- Contributing Variants -->
   <div class="mb-8">

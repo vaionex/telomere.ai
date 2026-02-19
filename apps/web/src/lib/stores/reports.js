@@ -4,9 +4,33 @@ import { matchSnps } from '@telomere/snp-db';
 import { calculateAllPGS } from '@telomere/pgs';
 import { buildTraits } from '$lib/utils/traits.js';
 
+// Memoization cache — keyed by snp map size + first few rsids to detect changes
+// Prevents expensive recomputation on every SvelteKit navigation
+const cache = {
+  matched: { key: null, value: [] },
+  pgs: { key: null, value: [] },
+  traits: { key: null, value: [] },
+};
+
+function snpCacheKey($snps) {
+  if ($snps.size === 0) return '';
+  // Use size + first 5 keys as a fast fingerprint
+  const keys = [];
+  let i = 0;
+  for (const k of $snps.keys()) {
+    keys.push(k);
+    if (++i >= 5) break;
+  }
+  return `${$snps.size}:${keys.join(',')}`;
+}
+
 export const matchedSnps = derived(rawSnps, ($snps) => {
   if ($snps.size === 0) return [];
-  return matchSnps($snps);
+  const key = snpCacheKey($snps);
+  if (cache.matched.key === key) return cache.matched.value;
+  const result = matchSnps($snps);
+  cache.matched = { key, value: result };
+  return result;
 });
 
 export const reportsByCategory = derived(matchedSnps, ($matched) => {
@@ -28,7 +52,11 @@ export const topFindings = derived(matchedSnps, ($matched) => {
 
 export const pgsResults = derived(rawSnps, ($snps) => {
   if ($snps.size === 0) return [];
-  return calculateAllPGS($snps);
+  const key = snpCacheKey($snps);
+  if (cache.pgs.key === key) return cache.pgs.value;
+  const result = calculateAllPGS($snps);
+  cache.pgs = { key, value: result };
+  return result;
 });
 
 export const categoryRiskSummary = derived(reportsByCategory, ($cats) => {
@@ -46,7 +74,12 @@ export const categoryRiskSummary = derived(reportsByCategory, ($cats) => {
 
 export const traitResults = derived(matchedSnps, ($matched) => {
   if ($matched.length === 0) return [];
-  return buildTraits($matched);
+  // Cache traits since buildTraits is the most expensive operation
+  const key = $matched.length + ':' + ($matched[0]?.rsid || '');
+  if (cache.traits.key === key) return cache.traits.value;
+  const result = buildTraits($matched);
+  cache.traits = { key, value: result };
+  return result;
 });
 
 export const categoryMeta = {
