@@ -38,7 +38,26 @@
 
 <svelte:head>
   <title>Telomere AI — Decode Your DNA. Locally. For Free.</title>
-  <meta name="description" content="Free, open-source genetic analysis desktop app. Open your 23andMe, AncestryDNA, or VCF data and get AI-powered health insights. 100% offline." />
+  <meta name="description" content="Free, open-source genetic analysis platform. Upload your 23andMe, AncestryDNA, or VCF data and get health, trait, and pharmacogenomic insights. 332 SNPs analyzed. 100% in your browser." />
+  <meta property="og:title" content="Telomere AI — Decode Your DNA" />
+  <meta property="og:description" content="Free genetic analysis. 332 SNPs, 238 traits, pharmacogenomics, family comparison. Your DNA never leaves your browser." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://telomere.ai" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Telomere AI — Decode Your DNA" />
+  <meta name="twitter:description" content="Free, open-source genetic analysis. Upload 23andMe/AncestryDNA/VCF data. Health risks, traits, pharmacogenomics. Privacy-first." />
+  <link rel="canonical" href="https://telomere.ai" />
+  {@html `<script type="application/ld+json">${JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Telomere AI",
+    "url": "https://telomere.ai",
+    "description": "Free, open-source genetic analysis platform. Upload your 23andMe, AncestryDNA, or VCF data for health, trait, and pharmacogenomic insights.",
+    "applicationCategory": "HealthApplication",
+    "operatingSystem": "Web Browser",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "creator": { "@type": "Organization", "name": "Vaionex Corporation", "url": "https://vaionex.com" }
+  })}</script>`}
 </svelte:head>
 
 <!-- Hero -->

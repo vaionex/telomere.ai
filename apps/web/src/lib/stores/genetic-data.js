@@ -2,11 +2,11 @@ import { writable, derived } from 'svelte/store';
 
 /**
  * Multi-genome data store
- * Supports up to 5 loaded genomes for family comparison
+ * Supports up to 6 loaded genomes for family comparison
  */
 
 // Colors assigned to each genome slot
-export const GENOME_COLORS = ['#00E5CC', '#8B5CF6', '#F59E0B', '#10B981', '#F43F5E'];
+export const GENOME_COLORS = ['#00E5CC', '#8B5CF6', '#F59E0B', '#10B981', '#F43F5E', '#6366F1'];
 export const GENOME_COLOR_NAMES = ['cyan', 'violet', 'amber', 'green', 'rose'];
 
 // All loaded genomes: { id, name, color, snps: Map, metadata: {} }
@@ -52,7 +52,7 @@ export const compareMode = writable(false);
 export function addGenome(name, snps, metadata) {
   let idx;
   genomes.update($g => {
-    if ($g.length >= 5) return $g; // max 5
+    if ($g.length >= 6) return $g; // max 6
     idx = $g.length;
     return [...$g, {
       id: crypto.randomUUID(),
