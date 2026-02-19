@@ -200,9 +200,9 @@
 </svelte:head>
 
 {#if loaded}
-<div class="flex max-w-7xl mx-auto px-4 sm:px-6 gap-6">
+<div class="flex max-w-7xl mx-auto px-4 sm:px-6 gap-6" role="main">
   <!-- LEFT SIDEBAR -->
-  <aside class="hidden lg:flex flex-col w-56 flex-shrink-0 sticky top-4 self-start max-h-[calc(100vh-2rem)] overflow-y-auto py-4">
+  <aside class="hidden lg:flex flex-col w-56 flex-shrink-0 sticky top-4 self-start max-h-[calc(100vh-2rem)] overflow-y-auto py-4" aria-label="Analysis navigation">
     <!-- Genome switcher -->
     {#if genomesVal.length > 1}
       <div class="mb-4 pb-4 border-b border-black/5">
@@ -243,7 +243,8 @@
         <svg class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[var(--color-text-tertiary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
         <input
           type="text"
-          placeholder="Search..."
+          placeholder="Search traits, genes, or rsIDs..."
+          aria-label="Search traits"
           bind:value={searchQuery}
           class="w-full pl-8 pr-3 py-1.5 text-xs rounded-md border border-black/10 bg-white focus:outline-none focus:border-blue-300 focus:ring-1 focus:ring-blue-200 placeholder:text-[var(--color-text-tertiary)]"
         />
@@ -251,7 +252,7 @@
     </div>
 
     <!-- Navigation -->
-    <nav class="flex flex-col gap-0.5 flex-1">
+    <nav class="flex flex-col gap-0.5 flex-1" aria-label="Trait categories">
       {#each navItems as item}
         <button
           onclick={() => { activeSection = item.id; riskFilter = 'all'; }}

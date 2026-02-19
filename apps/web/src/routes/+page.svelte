@@ -43,7 +43,9 @@
   <meta property="og:description" content="Free genetic analysis. 332 SNPs, 238 traits, pharmacogenomics, family comparison. Your DNA never leaves your browser." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://telomere.ai" />
+  <meta property="og:image" content="https://telomere.ai/og-image.svg" />
   <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://telomere.ai/og-image.svg" />
   <meta name="twitter:title" content="Telomere AI — Decode Your DNA" />
   <meta name="twitter:description" content="Free, open-source genetic analysis. Upload 23andMe/AncestryDNA/VCF data. Health risks, traits, pharmacogenomics. Privacy-first." />
   <link rel="canonical" href="https://telomere.ai" />
