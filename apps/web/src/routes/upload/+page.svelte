@@ -1,5 +1,13 @@
 <script>
   import FileUpload from '$lib/components/FileUpload.svelte';
+  import { SAMPLE_GENOME } from '$lib/data/sample-genome.js';
+  import { addGenome } from '$lib/stores/genetic-data.js';
+  import { goto } from '$app/navigation';
+
+  function loadDemo() {
+    addGenome(SAMPLE_GENOME.name, SAMPLE_GENOME.snps, SAMPLE_GENOME.metadata);
+    goto('/dashboard');
+  }
 </script>
 
 <svelte:head>
@@ -36,6 +44,14 @@
 
     <!-- Upload component -->
     <FileUpload />
+
+    <!-- Demo option -->
+    <div class="text-center">
+      <button onclick={loadDemo} class="text-accent-cyan hover:text-accent-blue text-sm font-medium transition-colors inline-flex items-center gap-1.5">
+        No genetic data? Try with sample data
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+      </button>
+    </div>
 
     <!-- Supported formats -->
     <div class="text-center text-xs text-text-tertiary space-y-1">

@@ -1,7 +1,8 @@
 <script>
   import { goto } from '$app/navigation';
   import { isLoaded, rawSnps, genomes, canCompare, removeGenome, clearAll } from '$lib/stores/genetic-data.js';
-  import { matchedSnps, reportsByCategory, categoryMeta, pgsResults } from '$lib/stores/reports.js';
+  import { matchedSnps, reportsByCategory, categoryMeta, pgsResults, categoryRiskSummary } from '$lib/stores/reports.js';
+  import { exportMatchedSnpsCsv, exportReport } from '$lib/utils/export.js';
   import { get } from 'svelte/store';
 
   let loaded = $state(false);
@@ -13,6 +14,11 @@
   let showCompare = $state(false);
   let storageUsed = $state('');
   let showClearConfirm = $state(false);
+  let riskSummary = $state({});
+  let genomeName = $state('');
+
+  function handleExportCsv() { exportMatchedSnpsCsv(matched, genomeName); }
+  function handleExportReport() { exportReport(matched, pgs, genomeName); }
 
   $effect(() => {
     const l = get(isLoaded);
@@ -24,6 +30,9 @@
     pgs = get(pgsResults);
     genomesVal = get(genomes);
     showCompare = get(canCompare);
+    riskSummary = get(categoryRiskSummary);
+    const ag = get(genomes);
+    genomeName = ag[0]?.name || '';
 
     // Estimate localStorage usage
     try {
@@ -86,6 +95,14 @@
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
         Explore All SNPs
       </a>
+      <button onclick={handleExportCsv} class="text-sm text-text-secondary hover:text-text-primary transition-colors flex items-center gap-1.5 px-3 py-2 rounded-lg glass">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h4a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+        CSV
+      </button>
+      <button onclick={handleExportReport} class="text-sm text-text-secondary hover:text-text-primary transition-colors flex items-center gap-1.5 px-3 py-2 rounded-lg glass">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        Report
+      </button>
     </div>
   </div>
 
@@ -166,6 +183,17 @@
           <svg class="w-4 h-4 text-text-tertiary group-hover:text-accent-blue transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
         </div>
         <p class="text-xs text-text-secondary leading-relaxed">{meta.description}</p>
+        {#if riskSummary[cat]}
+          {@const rs = riskSummary[cat]}
+          <div class="flex items-center gap-3 text-[10px]">
+            <div class="flex-1 h-1.5 rounded-full bg-surface-secondary overflow-hidden">
+              <div class="h-full rounded-full transition-all duration-500 {rs.avgRisk >= 60 ? 'bg-accent-red' : rs.avgRisk >= 35 ? 'bg-accent-amber' : 'bg-accent-green'}" style="width: {rs.avgRisk}%"></div>
+            </div>
+            <span class="text-text-tertiary flex-shrink-0">avg {rs.avgRisk}%</span>
+            {#if rs.highCount > 0}<span class="text-accent-red">{rs.highCount} high</span>{/if}
+            {#if rs.carrierCount > 0}<span class="text-accent-blue">{rs.carrierCount} carrier</span>{/if}
+          </div>
+        {/if}
       </a>
     {/each}
   </div>
