@@ -22,6 +22,9 @@ importers:
       '@telomere/parsers':
         specifier: workspace:*
         version: link:../../packages/parsers
+      '@telomere/pgs':
+        specifier: workspace:*
+        version: link:../../packages/pgs
       '@telomere/snp-db':
         specifier: workspace:*
         version: link:../../packages/snp-db

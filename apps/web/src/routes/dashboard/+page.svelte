@@ -1,13 +1,14 @@
 <script>
   import { goto } from '$app/navigation';
   import { isLoaded, rawSnps } from '$lib/stores/genetic-data.js';
-  import { matchedSnps, reportsByCategory, categoryMeta } from '$lib/stores/reports.js';
+  import { matchedSnps, reportsByCategory, categoryMeta, pgsResults } from '$lib/stores/reports.js';
   import { get } from 'svelte/store';
 
   let loaded = $state(false);
   let snpCount = $state(0);
   let matched = $state([]);
   let byCat = $state({});
+  let pgs = $state([]);
 
   $effect(() => {
     const l = get(isLoaded);
@@ -16,6 +17,7 @@
     snpCount = get(rawSnps).size;
     matched = get(matchedSnps);
     byCat = get(reportsByCategory);
+    pgs = get(pgsResults);
   });
 
   const riskCount = $derived(matched.filter(s => s.riskLevel === 'high' || s.riskLevel === 'moderate').length);
@@ -32,7 +34,8 @@
 </script>
 
 <svelte:head>
-  <title>Dashboard — Telomere.ai</title>
+  <title>Your Results — Telomere.ai</title>
+  <meta name="robots" content="noindex" />
 </svelte:head>
 
 {#if loaded}
@@ -71,6 +74,44 @@
       <p class="text-xs text-text-tertiary mt-1">Categories</p>
     </div>
   </div>
+
+  <!-- Polygenic Risk Scores -->
+  {#if pgs.length > 0}
+  <div class="space-y-4">
+    <div>
+      <h2 class="text-lg font-semibold text-text-primary">Polygenic Risk Scores</h2>
+      <p class="text-xs text-text-tertiary mt-1">Combined effect of multiple genetic variants on trait risk</p>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      {#each pgs as result}
+        {@const riskColor = result.percentile >= 70 ? 'accent-red' : result.percentile >= 30 ? 'accent-amber' : 'accent-green'}
+        {@const riskLabel = result.percentile >= 70 ? 'Elevated' : result.percentile >= 30 ? 'Average' : 'Below average'}
+        <div class="card space-y-3">
+          <div class="flex items-start justify-between gap-2">
+            <div class="flex-1 min-w-0">
+              <h3 class="font-semibold text-sm text-text-primary">{result.trait}</h3>
+              <p class="text-xs text-text-tertiary mt-0.5">{result.description}</p>
+            </div>
+            <span class="text-[10px] font-medium px-2 py-0.5 rounded-full bg-surface-secondary text-text-secondary flex-shrink-0">{result.category}</span>
+          </div>
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between text-xs">
+              <span class="text-text-secondary">{result.percentile}th percentile</span>
+              <span class="text-{riskColor} font-medium">{riskLabel}</span>
+            </div>
+            <div class="w-full h-2 rounded-full bg-surface-secondary overflow-hidden">
+              <div
+                class="h-full rounded-full transition-all duration-500 bg-{riskColor}"
+                style="width: {result.percentile}%"
+              ></div>
+            </div>
+          </div>
+          <p class="text-[10px] text-text-tertiary">{result.variantsUsed} of {result.variantsTotal} variants found in your data</p>
+        </div>
+      {/each}
+    </div>
+  </div>
+  {/if}
 
   <!-- Category cards -->
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

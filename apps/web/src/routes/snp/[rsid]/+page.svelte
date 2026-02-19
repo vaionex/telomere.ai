@@ -40,7 +40,17 @@
 </script>
 
 <svelte:head>
-  <title>{rsid} — {snp?.gene || 'SNP'} — Telomere.ai</title>
+  <title>{rsid} ({snp?.gene || 'SNP'}) — {snp?.trait || 'Variant'} | Telomere.ai</title>
+  {#if snp}
+    <meta name="description" content="{snp.rsid} in {snp.gene}: {snp.riskDescription}. Clinical significance: {snp.significance}. Free analysis at Telomere.ai." />
+    {@html `<script type="application/ld+json">${JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'MedicalWebPage',
+      name: `${snp.rsid} (${snp.gene})`,
+      description: snp.trait,
+      about: { '@type': 'MedicalCondition', name: snp.trait }
+    })}</script>`}
+  {/if}
 </svelte:head>
 
 <section class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-6">

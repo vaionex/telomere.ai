@@ -42,7 +42,16 @@
 </script>
 
 <svelte:head>
-  <title>SNP Explorer — Telomere.ai</title>
+  <title>SNP Database Explorer — {allSnps.length} Genetic Variants | Telomere.ai</title>
+  <meta name="description" content="Browse our curated database of {allSnps.length} clinically significant genetic variants across health, nutrition, pharmacogenomics, traits, longevity, and carrier status." />
+  {@html `<script type="application/ld+json">${JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'Dataset',
+    name: 'Telomere.ai SNP Database',
+    description: 'Curated database of clinically significant genetic variants',
+    creator: { '@type': 'Organization', name: 'Telomere.ai' },
+    license: 'https://opensource.org/licenses/MIT'
+  })}</script>`}
 </svelte:head>
 
 <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-6">

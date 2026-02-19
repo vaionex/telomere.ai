@@ -4,6 +4,9 @@
 
 <svelte:head>
   <title>Upload Genetic Data — Telomere.ai</title>
+  <meta name="description" content="Upload your 23andMe, AncestryDNA, or whole genome sequencing data for free genetic analysis. 100% browser-based — your DNA never leaves your device." />
+  <meta property="og:title" content="Free Genetic Analysis — Telomere.ai" />
+  <meta property="og:description" content="Analyze your genome for health risks, pharmacogenomics, and traits. Completely private — runs in your browser." />
 </svelte:head>
 
 <section class="relative min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center px-4 py-16">

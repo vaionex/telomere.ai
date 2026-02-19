@@ -20,7 +20,11 @@
 </script>
 
 <svelte:head>
-  <title>{meta?.title || 'Report'} — Telomere.ai</title>
+  <title>{meta?.title || 'Report'} — Genetic Report | Telomere.ai</title>
+  {#if meta}
+    <meta name="description" content="{meta.title}: {meta.description}. Personalized genetic analysis at Telomere.ai." />
+  {/if}
+  <meta name="robots" content="noindex" />
 </svelte:head>
 
 {#if loaded && meta}

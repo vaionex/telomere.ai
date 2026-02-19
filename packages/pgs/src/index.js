@@ -78,6 +78,47 @@ export function calculatePGS(userSnps, scoringVariants) {
 }
 
 /**
+ * Bundled scoring data for offline-first PGS calculation
+ */
+import { PGS_SCORES } from './scores.js';
+export { PGS_SCORES };
+
+/**
+ * Calculate all bundled polygenic risk scores for a user's SNP data
+ * @param {Map} userSnps - Map<rsid, { genotype, allele1, allele2 }>
+ * @returns {Array} Array of PGS results with percentiles
+ */
+export function calculateAllPGS(userSnps) {
+  const results = [];
+  for (const [id, score] of Object.entries(PGS_SCORES)) {
+    const pgsResult = calculatePGS(userSnps, score.variants);
+    results.push({
+      id,
+      trait: score.trait,
+      category: score.category,
+      description: score.description,
+      score: pgsResult.score,
+      percentile: scoreToPercentile(pgsResult.score),
+      variantsUsed: pgsResult.matched,
+      variantsTotal: score.variants.length,
+      coverage: pgsResult.matched / score.variants.length
+    });
+  }
+  return results;
+}
+
+/**
+ * Convert raw PGS to approximate percentile (assumes normal distribution)
+ */
+function scoreToPercentile(score) {
+  const z = score;
+  const t = 1 / (1 + 0.2316419 * Math.abs(z));
+  const d = 0.3989422804 * Math.exp(-z * z / 2);
+  const p = d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274))));
+  return Math.round((z > 0 ? 1 - p : p) * 100);
+}
+
+/**
  * Pre-curated list of well-validated PGS scores for common conditions
  */
 export const COMMON_PGS = [
