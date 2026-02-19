@@ -1,5 +1,9 @@
 import { snpDatabase } from './data.js';
 
+// Array and Map exports for new code
+export const SNP_DATABASE = Object.values(snpDatabase);
+export const SNP_MAP = new Map(SNP_DATABASE.map(s => [s.rsid, s]));
+
 /** Lookup a single SNP by rsid */
 export function lookupSnp(rsid) {
   return snpDatabase[rsid] || null;
@@ -25,16 +29,22 @@ export function searchSnps(query) {
   const q = query.toLowerCase();
   return Object.values(snpDatabase).filter(s =>
     s.rsid.toLowerCase().includes(q) ||
-    s.gene.toLowerCase().includes(q) ||
-    s.trait.toLowerCase().includes(q)
+    s.gene?.toLowerCase().includes(q) ||
+    s.trait?.toLowerCase().includes(q) ||
+    s.conditions?.some(c => c.toLowerCase().includes(q))
   );
 }
 
 /** Get all available categories */
 export function getCategories() {
   const cats = new Set();
-  Object.values(snpDatabase).forEach(s => s.categories.forEach(c => cats.add(c)));
-  return [...cats];
+  Object.values(snpDatabase).forEach(s => s.categories?.forEach(c => cats.add(c)));
+  return [...cats].sort();
+}
+
+/** Get SNPs by category (alias) */
+export function getSnpsByCategory(category) {
+  return Object.values(snpDatabase).filter(s => s.categories?.includes(category));
 }
 
 /** Get all SNPs as array */
