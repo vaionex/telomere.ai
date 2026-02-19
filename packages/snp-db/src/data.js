@@ -1,11 +1,8 @@
-/**
- * SNP database — curated + expanded data
- * Generated: 2026-02-19T08:41:15.682Z
- * Sources: ClinVar, SNPedia, PharmGKB, GWAS Catalog
- * Curated entries: 99
- * Expanded entries: 153
- * Total: 252
- */
+// Auto-generated SNP database — DO NOT EDIT MANUALLY
+// Run: node scripts/expand-snp-db.js to add more SNPs
+// Last updated: 2026-02-19T08:43:03.962Z
+// Total SNPs: 257
+
 export const snpDatabase = {
   "rs2736100": {
     "rsid": "rs2736100",
@@ -7284,5 +7281,166 @@ export const snpDatabase = {
       "Neurological awareness"
     ],
     "references": []
+  },
+  "rs174546": {
+    "rsid": "rs174546",
+    "gene": "FADS1",
+    "chromosome": "11",
+    "position": 61597972,
+    "categories": [
+      "nutrition"
+    ],
+    "significance": "well-established",
+    "riskAllele": "T",
+    "normalAllele": "C",
+    "trait": "Omega-3/6 Fatty Acid Metabolism — FADS1",
+    "riskDescription": "Reduced conversion of ALA to EPA/DHA — may benefit from direct omega-3",
+    "normalDescription": "Efficient omega fatty acid desaturation",
+    "heterozygousDescription": "Intermediate fatty acid conversion efficiency",
+    "populationFrequency": {
+      "CC": 0.35,
+      "CT": 0.48,
+      "TT": 0.17
+    },
+    "conditions": [
+      "Omega-3 fatty acid metabolism",
+      "Inflammation levels"
+    ],
+    "recommendations": [
+      "Consider direct EPA/DHA supplementation (fish oil)",
+      "TT genotype: plant-based omega-3 (ALA) less efficiently converted"
+    ],
+    "references": [
+      "PMID:21829377"
+    ]
+  },
+  "rs1800429": {
+    "rsid": "rs1800429",
+    "gene": "HEXA",
+    "chromosome": "15",
+    "position": 72638892,
+    "categories": [
+      "carrier"
+    ],
+    "significance": "well-established",
+    "riskAllele": "A",
+    "normalAllele": "G",
+    "trait": "Tay-Sachs Carrier — HEXA",
+    "riskDescription": "Tay-Sachs disease",
+    "normalDescription": "Non-carrier",
+    "heterozygousDescription": "Tay-Sachs carrier — higher frequency in Ashkenazi Jewish population",
+    "populationFrequency": {
+      "GG": 0.97,
+      "GA": 0.028,
+      "AA": 0.002
+    },
+    "conditions": [
+      "Tay-Sachs disease carrier"
+    ],
+    "recommendations": [
+      "Carrier screening recommended for at-risk populations",
+      "Genetic counseling before family planning"
+    ],
+    "references": [
+      "PMID:3020429"
+    ]
+  },
+  "rs4420638": {
+    "rsid": "rs4420638",
+    "gene": "APOE/APOC1",
+    "chromosome": "19",
+    "position": 45422946,
+    "categories": [
+      "health",
+      "longevity"
+    ],
+    "significance": "well-established",
+    "riskAllele": "G",
+    "normalAllele": "A",
+    "trait": "Alzheimer Disease Risk — APOE Region",
+    "riskDescription": "Strong proxy for APOE ε4 — elevated Alzheimer risk",
+    "normalDescription": "Lower Alzheimer risk",
+    "heterozygousDescription": "Moderately elevated risk",
+    "populationFrequency": {
+      "AA": 0.65,
+      "AG": 0.29,
+      "GG": 0.06
+    },
+    "conditions": [
+      "Alzheimer's disease",
+      "Cardiovascular disease"
+    ],
+    "recommendations": [
+      "Consider neuroprotective lifestyle measures"
+    ],
+    "references": [
+      "PMID:19668339"
+    ]
+  },
+  "rs10830963": {
+    "rsid": "rs10830963",
+    "gene": "MTNR1B",
+    "chromosome": "11",
+    "position": 92975544,
+    "categories": [
+      "health",
+      "traits"
+    ],
+    "significance": "well-established",
+    "riskAllele": "G",
+    "normalAllele": "C",
+    "trait": "Fasting Glucose & Melatonin — MTNR1B",
+    "riskDescription": "Higher fasting glucose levels, impaired insulin secretion",
+    "normalDescription": "Normal fasting glucose regulation",
+    "heterozygousDescription": "Slightly elevated fasting glucose",
+    "populationFrequency": {
+      "CC": 0.55,
+      "CG": 0.38,
+      "GG": 0.07
+    },
+    "conditions": [
+      "Elevated fasting glucose",
+      "Type 2 diabetes risk",
+      "Melatonin receptor function"
+    ],
+    "recommendations": [
+      "Avoid late-night eating — may worsen glucose control",
+      "Early dinner may be beneficial for GG carriers"
+    ],
+    "references": [
+      "PMID:19060907"
+    ]
+  },
+  "rs33972313": {
+    "rsid": "rs33972313",
+    "gene": "SLC23A1",
+    "chromosome": "5",
+    "position": 139388003,
+    "categories": [
+      "nutrition"
+    ],
+    "significance": "moderate",
+    "riskAllele": "T",
+    "normalAllele": "C",
+    "trait": "Vitamin C Transport — SLC23A1",
+    "riskDescription": "Reduced vitamin C absorption/transport",
+    "normalDescription": "Normal vitamin C transport efficiency",
+    "heterozygousDescription": "Slightly reduced vitamin C levels",
+    "populationFrequency": {
+      "CC": 0.82,
+      "CT": 0.17,
+      "TT": 0.01
+    },
+    "conditions": [
+      "Vitamin C status",
+      "Scurvy susceptibility (extreme)"
+    ],
+    "recommendations": [
+      "Higher vitamin C intake may be beneficial",
+      "Extra citrus fruits and vegetables"
+    ],
+    "references": [
+      "PMID:20200951"
+    ]
   }
 };
