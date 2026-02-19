@@ -1,11 +1,10 @@
-import { derived } from 'svelte/store';
-import { rawSnps } from './genetic-data.js';
+import { derived, get } from 'svelte/store';
+import { rawSnps, activeGenome } from './genetic-data.js';
 import { matchSnps } from '@telomere/snp-db';
 import { calculateAllPGS } from '@telomere/pgs';
 import { buildTraits } from '$lib/utils/traits.js';
 
-// Memoization cache — keyed by snp map size + first few rsids to detect changes
-// Prevents expensive recomputation on every SvelteKit navigation
+// Memoization cache — keyed by genome ID + snp count
 const cache = {
   matched: { key: null, value: [] },
   pgs: { key: null, value: [] },
@@ -14,14 +13,9 @@ const cache = {
 
 function snpCacheKey($snps) {
   if ($snps.size === 0) return '';
-  // Use size + first 5 keys as a fast fingerprint
-  const keys = [];
-  let i = 0;
-  for (const k of $snps.keys()) {
-    keys.push(k);
-    if (++i >= 5) break;
-  }
-  return `${$snps.size}:${keys.join(',')}`;
+  // Use genome ID + size for unique key per genome
+  const genome = get(activeGenome);
+  return `${genome?.id || 'x'}:${$snps.size}`;
 }
 
 export const matchedSnps = derived(rawSnps, ($snps) => {

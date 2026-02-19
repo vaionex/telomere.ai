@@ -7,11 +7,11 @@
   import { isLoaded } from '$lib/stores/genetic-data.js';
   import { traitResults } from '$lib/stores/reports.js';
   import { generateSummary } from '$lib/utils/traits.js';
-  import { getTraitDescription } from '$lib/data/trait-descriptions.js';
   import { get } from 'svelte/store';
 
   let trait = $state(null);
   let expandedSnp = $state(null);
+  let traitDescriptionData = $state(null);
 
   const riskColors = { high: 'text-red-600', moderate: 'text-amber-600', low: 'text-green-600', carrier: 'text-blue-600', normal: 'text-green-600' };
   const riskBgColors = { high: 'bg-red-50 border-red-200', moderate: 'bg-amber-50 border-amber-200', low: 'bg-green-50 border-green-200', carrier: 'bg-blue-50 border-blue-200', normal: 'bg-green-50 border-green-200' };
@@ -29,7 +29,14 @@
     if (!trait && typeof window !== 'undefined') goto('/analysis');
   }
 
-  let traitDescription = $derived(trait ? getTraitDescription(trait.id) : null);
+  // Lazy-load trait descriptions (2MB file) only when needed
+  if (trait && typeof window !== 'undefined') {
+    import('$lib/data/trait-descriptions.js').then(mod => {
+      traitDescriptionData = mod.getTraitDescription(trait.id);
+    });
+  }
+
+  let traitDescription = $derived(traitDescriptionData);
 
   function toggleSnp(rsid) {
     expandedSnp = expandedSnp === rsid ? null : rsid;

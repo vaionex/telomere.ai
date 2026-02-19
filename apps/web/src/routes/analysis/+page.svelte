@@ -1,12 +1,17 @@
 <script>
+  export const ssr = false;
+  export const prerender = false;
+
   import { goto } from '$app/navigation';
   import { page } from '$app/stores';
+  import { onDestroy } from 'svelte';
   import { isLoaded, rawSnps, genomes, activeGenome, setActiveGenome, activeGenomeIndex } from '$lib/stores/genetic-data.js';
   import { matchedSnps, reportsByCategory, categoryMeta, pgsResults, categoryRiskSummary, topFindings, traitResults } from '$lib/stores/reports.js';
   import { filterTraitsByCategory } from '$lib/utils/traits.js';
   import { exportMatchedSnpsCsv, exportReport } from '$lib/utils/export.js';
   import { get } from 'svelte/store';
 
+  // UI state (reactive)
   let activeSection = $state('overview');
   let searchQuery = $state('');
   let riskFilter = $state('all');
@@ -14,21 +19,43 @@
   let sortDir = $state('desc');
   let expandedChromosomes = $state(new Set());
 
-  // One-time snapshot from stores (data doesn't change during session)
-  let loaded = get(isLoaded);
-  let snpCount = get(rawSnps).size;
-  let matched = get(matchedSnps);
-  let byCat = get(reportsByCategory);
-  let pgs = get(pgsResults);
-  let genomesVal = get(genomes);
-  let riskSummary = get(categoryRiskSummary);
-  let topFindingsVal = get(topFindings);
-  let activeGenomeIdx = get(activeGenomeIndex);
-  let traits = get(traitResults);
-  let genomeName = get(activeGenome)?.name || '';
+  // Store-backed state — subscribe so genome switching works
+  let loaded = $state(false);
+  let snpCount = $state(0);
+  let matched = $state([]);
+  let byCat = $state({});
+  let pgs = $state([]);
+  let genomesVal = $state([]);
+  let riskSummary = $state({});
+  let genomeName = $state('');
+  let topFindingsVal = $state([]);
+  let activeGenomeIdx = $state(0);
+  let traits = $state([]);
+
+  // Single subscription that batches all store reads — no infinite loops
+  // because we subscribe to Svelte 4 stores via .subscribe(), not via $effect
+  const unsubs = [];
+  function syncFromStores() {
+    loaded = get(isLoaded);
+    if (!loaded) return;
+    snpCount = get(rawSnps).size;
+    matched = get(matchedSnps);
+    byCat = get(reportsByCategory);
+    pgs = get(pgsResults);
+    genomesVal = get(genomes);
+    riskSummary = get(categoryRiskSummary);
+    topFindingsVal = get(topFindings);
+    activeGenomeIdx = get(activeGenomeIndex);
+    traits = get(traitResults);
+    genomeName = get(activeGenome)?.name || '';
+  }
+  // Subscribe to the root reactive source — when genome changes, rawSnps changes, everything cascades
+  unsubs.push(rawSnps.subscribe(() => syncFromStores()));
+  unsubs.push(activeGenomeIndex.subscribe(() => syncFromStores()));
+  onDestroy(() => unsubs.forEach(u => u()));
 
   // Redirect if no data
-  if (!loaded && typeof window !== 'undefined') {
+  if (!get(isLoaded) && typeof window !== 'undefined') {
     goto('/upload');
   }
 
@@ -59,15 +86,18 @@
   const riskCircleText = { high: 'text-red-700', moderate: 'text-amber-700', low: 'text-green-700', carrier: 'text-blue-700', normal: 'text-green-700' };
   const riskLabelText = { high: 'Elevated', moderate: 'Moderate', low: 'Typical', carrier: 'Carrier', normal: 'Typical' };
 
+  // All derived values now properly track $state variables
   let highCount = $derived(matched.filter(s => s.riskLevel === 'high').length);
   let modCount = $derived(matched.filter(s => s.riskLevel === 'moderate').length);
   let carrierCount = $derived(matched.filter(s => s.riskLevel === 'carrier').length);
 
-  // Trait counts per category for sidebar
+  // Pre-compute all category counts in one pass
   let traitCountByCategory = $derived.by(() => {
     const counts = {};
-    for (const cat of Object.keys(sectionToCat)) {
-      counts[sectionToCat[cat]] = filterTraitsByCategory(traits, sectionToCat[cat]).length;
+    for (const t of traits) {
+      for (const cat of t.categories) {
+        counts[cat] = (counts[cat] || 0) + 1;
+      }
     }
     return counts;
   });
