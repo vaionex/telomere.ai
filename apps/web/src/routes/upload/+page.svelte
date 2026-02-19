@@ -6,7 +6,7 @@
 
   function loadDemo() {
     addGenome(SAMPLE_GENOME.name, SAMPLE_GENOME.snps, SAMPLE_GENOME.metadata);
-    goto('/dashboard');
+    goto('/analysis');
   }
 </script>
 

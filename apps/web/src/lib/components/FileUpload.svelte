@@ -204,7 +204,7 @@
   function onNameChosen(name) {
     if (parsedSnps && parsedMeta) {
       addGenome(name, parsedSnps, parsedMeta);
-      goto('/dashboard');
+      goto('/analysis');
     }
   }
 
