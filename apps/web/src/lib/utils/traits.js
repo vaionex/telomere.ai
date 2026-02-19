@@ -1,15 +1,21 @@
+import { normalizeCondition } from './condition-merge.js';
+
 /**
  * Build traits from matched SNPs by grouping on:
  * 1. Shared conditions (e.g., "Type 2 diabetes" links 10 SNPs)
  * 2. Same gene with related function (e.g., CYP2D6 variants → "Drug Metabolism via CYP2D6")
  * 3. Standalone SNPs become their own trait
+ *
+ * Conditions are normalized via condition-merge.js to avoid duplicates
+ * like "Alzheimer disease" / "Alzheimer disease risk" / "Alzheimer's disease"
  */
 export function buildTraits(matchedSnps) {
   const conditionMap = new Map();
   const usedSnps = new Set();
 
   for (const snp of matchedSnps) {
-    for (const condition of (snp.conditions || [])) {
+    for (const rawCondition of (snp.conditions || [])) {
+      const condition = normalizeCondition(rawCondition);
       if (!conditionMap.has(condition)) conditionMap.set(condition, []);
       conditionMap.get(condition).push(snp);
     }
