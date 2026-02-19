@@ -6,7 +6,7 @@
     "build": "pnpm --filter @telomere/web build",
     "preview": "pnpm --filter @telomere/web preview",
     "tauri": "tauri",
-    "tauri:dev": "tauri dev",
-    "tauri:build": "tauri build"
+    "tauri:dev": "cargo tauri dev",
+    "tauri:build": "cargo tauri build"
   }
 }
