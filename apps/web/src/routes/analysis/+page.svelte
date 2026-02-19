@@ -1,7 +1,4 @@
 <script>
-  export const ssr = false;
-  export const prerender = false;
-
   import { goto } from '$app/navigation';
   import { page } from '$app/stores';
   import { isLoaded, rawSnps, genomes, activeGenome, setActiveGenome, activeGenomeIndex } from '$lib/stores/genetic-data.js';
@@ -156,66 +153,7 @@
 </svelte:head>
 
 {#if loaded}
-<div class="fixed inset-0 top-16 flex bg-[var(--color-bg-primary)]">
-  <!-- LEFT SIDEBAR (desktop) -->
-  <aside class="hidden lg:flex flex-col w-60 bg-white border-r border-black/5 overflow-y-auto flex-shrink-0">
-    <div class="p-4 border-b border-black/5">
-      <div class="flex items-center gap-2">
-        <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background-color: {genomesVal[activeGenomeIdx]?.color || '#3B82F6'}"></span>
-        <span class="text-sm font-semibold text-[var(--color-text-primary)] truncate">{genomeName || 'Genome'}</span>
-        {#if genomesVal.length > 1}
-          <select class="ml-auto text-xs bg-transparent border border-black/10 rounded px-1 py-0.5 text-[var(--color-text-secondary)]" onchange={(e) => setActiveGenome(Number(e.target.value))}>
-            {#each genomesVal as g, i}
-              <option value={i} selected={i === activeGenomeIdx}>{g.name}</option>
-            {/each}
-          </select>
-        {/if}
-      </div>
-      <div class="flex items-center gap-3 mt-3 text-xs">
-        {#if highCount > 0}<span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-red-500"></span><span class="text-red-600 font-medium">{highCount}</span></span>{/if}
-        {#if modCount > 0}<span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-amber-500"></span><span class="text-amber-600 font-medium">{modCount}</span></span>{/if}
-        {#if carrierCount > 0}<span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-blue-500"></span><span class="text-blue-600 font-medium">{carrierCount}</span></span>{/if}
-      </div>
-    </div>
-
-    <div class="px-4 pt-3 pb-2">
-      <div class="relative">
-        <svg class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[var(--color-text-tertiary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-        <input type="text" placeholder="Search..." bind:value={searchQuery} class="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg border border-black/10 bg-[var(--color-bg-primary)] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-tertiary)] focus:outline-none focus:ring-1 focus:ring-blue-400" />
-      </div>
-    </div>
-
-    <nav class="flex-1 px-2 py-1">
-      {#each navItems as item}
-        <button
-          onclick={() => { activeSection = item.id; riskFilter = 'all'; }}
-          class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors {activeSection === item.id ? 'bg-blue-50 text-blue-700 font-medium' : 'text-[var(--color-text-secondary)] hover:bg-black/[0.02]'}"
-        >
-          <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={item.icon}/></svg>
-          <span class="truncate">{item.label}</span>
-          {#if sectionToCat[item.id] && traitCountByCategory[sectionToCat[item.id]] != null}
-            <span class="ml-auto text-[10px] text-[var(--color-text-tertiary)]">{traitCountByCategory[sectionToCat[item.id]]}</span>
-          {/if}
-        </button>
-      {/each}
-    </nav>
-  </aside>
-
-  <!-- MOBILE TOP NAV -->
-  <div class="lg:hidden fixed top-16 left-0 right-0 z-40 bg-white border-b border-black/5 overflow-x-auto">
-    <div class="flex items-center gap-1 px-3 py-2 min-w-max">
-      {#each navItems as item}
-        <button
-          onclick={() => { activeSection = item.id; riskFilter = 'all'; }}
-          class="px-3 py-1.5 rounded-full text-xs whitespace-nowrap transition-colors {activeSection === item.id ? 'bg-blue-50 text-blue-700 font-medium' : 'text-[var(--color-text-secondary)] hover:bg-black/[0.02]'}"
-        >{item.label}</button>
-      {/each}
-    </div>
-  </div>
-
-  <!-- CENTER PANEL -->
-  <main class="flex-1 overflow-y-auto pt-12 lg:pt-0">
-    <div class="max-w-4xl mx-auto p-4 sm:p-6 space-y-6">
+<div class="max-w-4xl mx-auto p-4 sm:p-6 space-y-6">
 
       <!-- OVERVIEW -->
       {#if activeSection === 'overview'}
@@ -474,6 +412,4 @@
         </div>
       {/if}
     </div>
-  </main>
-</div>
 {/if}
