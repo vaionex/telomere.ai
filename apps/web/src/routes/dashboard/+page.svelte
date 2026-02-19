@@ -1,8 +1,9 @@
 <script>
-  import { rawSnps, fileMetadata, isLoaded } from '$lib/stores/genetic-data.js';
+  import { rawSnps, fileMetadata, isLoaded, genomes, activeGenomeIndex, compareMode, canCompare } from '$lib/stores/genetic-data.js';
   import { matchedSnps, reportsByCategory, topFindings, categoryMeta } from '$lib/stores/reports.js';
   import ChromosomeMap from '$lib/components/ChromosomeMap.svelte';
   import RiskGauge from '$lib/components/RiskGauge.svelte';
+  import GenomeSwitcher from '$lib/components/GenomeSwitcher.svelte';
 
   let activeTab = $state('overview');
   let searchQuery = $state('');
@@ -66,21 +67,26 @@
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24">
     
     <!-- Header -->
-    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
-      <div>
-        <h1 class="text-3xl font-bold">Your Genetic <span class="gradient-text">Report</span></h1>
-        {#if $fileMetadata}
-          <p class="text-text-secondary text-sm mt-1">
-            <span class="font-mono text-accent-cyan">{$fileMetadata.totalSnps.toLocaleString()}</span> SNPs analyzed from
-            <span class="font-mono">{$fileMetadata.fileName}</span>
-            <span class="text-text-tertiary">({$fileMetadata.format})</span>
-          </p>
-        {/if}
+    <div class="mb-6">
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-4">
+        <div>
+          <h1 class="text-3xl font-bold">Your Genetic <span class="gradient-text">Report</span></h1>
+          {#if $fileMetadata}
+            <p class="text-text-secondary text-sm mt-1">
+              <span class="font-mono text-accent-cyan">{$fileMetadata.totalSnps.toLocaleString()}</span> SNPs analyzed from
+              <span class="font-mono">{$fileMetadata.fileName}</span>
+              <span class="text-text-tertiary">({$fileMetadata.format})</span>
+            </p>
+          {/if}
+        </div>
       </div>
-      <a href="/upload" class="text-sm text-text-tertiary hover:text-text-secondary transition-colors flex items-center gap-1.5">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
-        Load different file
-      </a>
+      
+      <!-- Genome switcher bar -->
+      {#if $genomes.length > 0}
+        <div class="py-3 px-4 rounded-xl bg-white/[0.02] border border-white/5">
+          <GenomeSwitcher />
+        </div>
+      {/if}
     </div>
 
     <!-- Summary cards -->

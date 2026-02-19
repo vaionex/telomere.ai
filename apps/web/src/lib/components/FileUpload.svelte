@@ -1,15 +1,18 @@
 <script>
   import { parseGeneticFile } from '@telomere/parsers';
-  import { rawSnps, fileMetadata } from '$lib/stores/genetic-data.js';
+  import { addGenome } from '$lib/stores/genetic-data.js';
   import { goto } from '$app/navigation';
+  import GenomeNamePrompt from './GenomeNamePrompt.svelte';
 
   let dragover = $state(false);
-  let phase = $state('idle'); // idle | reading | parsing | matching | done | error
+  let phase = $state('idle'); // idle | reading | parsing | matching | naming | error
   let progress = $state(0);
   let snpsFound = $state(0);
   let errorMsg = $state('');
   let isTauri = $state(false);
   let fileName = $state('');
+  let parsedSnps = $state(null);
+  let parsedMeta = $state(null);
 
   $effect(() => {
     isTauri = typeof window !== 'undefined' && !!window.__TAURI_INTERNALS__;
@@ -40,19 +43,18 @@
       progress = 85;
       await tick(300);
 
-      rawSnps.set(result.snps);
-      fileMetadata.set({
+      // Store parsed data, show naming prompt
+      parsedSnps = result.snps;
+      parsedMeta = {
         format: result.format,
         totalSnps: result.metadata.totalSnps,
         chromosomeCount: result.metadata.chromosomeCount,
         buildVersion: result.metadata.buildVersion,
         fileName: name
-      });
+      };
 
       progress = 100;
-      phase = 'done';
-      await tick(600);
-      goto('/dashboard');
+      phase = 'naming';
     } catch (e) {
       errorMsg = e.message || 'Failed to parse file. Make sure it\'s a valid genetic data file.';
       phase = 'error';
@@ -115,7 +117,14 @@
     else document.getElementById('file-input')?.click();
   }
 
-  function reset() { phase = 'idle'; progress = 0; errorMsg = ''; snpsFound = 0; }
+  function reset() { phase = 'idle'; progress = 0; errorMsg = ''; snpsFound = 0; parsedSnps = null; parsedMeta = null; }
+
+  function onNameChosen(name) {
+    if (parsedSnps && parsedMeta) {
+      addGenome(name, parsedSnps, parsedMeta);
+      goto('/dashboard');
+    }
+  }
 
   const phaseLabel = $derived({
     reading: 'Reading file...',
@@ -126,6 +135,12 @@
 </script>
 
 <div class="space-y-6">
+  {#if phase === 'naming'}
+    <!-- Naming prompt (replaces entire drop zone) -->
+    <div class="rounded-2xl border border-white/10 bg-white/[0.02] p-12">
+      <GenomeNamePrompt onSubmit={onNameChosen} />
+    </div>
+  {:else}
   <!-- Drop zone -->
   <button
     class="relative w-full rounded-2xl border-2 border-dashed transition-all duration-300 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-accent-cyan/50
@@ -218,6 +233,7 @@
       </div>
     {/if}
   </button>
+  {/if}
 
   <!-- Error state -->
   {#if phase === 'error' && errorMsg}

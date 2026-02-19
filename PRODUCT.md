@@ -9,10 +9,30 @@ The user should never feel overwhelmed. Every screen answers: "What does this me
 ## Core User Flow
 
 ```
-Open App → Drop File → Processing Animation → Results Dashboard
+Open App → Drop File → Processing → Results Dashboard
+                                        ↓
+                              "Add Another Genome" → Drop File → Compare View
 ```
 
 No accounts. No onboarding wizard. One action: open your file. Everything else flows from there.
+
+### Multi-Genome Support
+Users often want to compare family members. The app supports multiple loaded genomes:
+
+- **Genome Switcher** — persistent pill bar at the top of the dashboard showing loaded genomes
+  - Each genome shows: name (editable label like "Mom", "Dad", "Me") + colored dot
+  - Click a genome to switch to their results
+  - "+" button to add another genome
+  - Active genome highlighted with cyan border
+- **Compare Mode** — toggle that shows variants side-by-side
+  - Shows all loaded genomes' genotypes for each variant
+  - Highlights differences between genomes
+  - Useful for: "Do I share this risk with my mother?"
+  - Carrier analysis: "Could our children inherit this?"
+- **Naming** — after loading a file, a small inline prompt asks "Give this genome a name" with suggestions like "Me", "Partner", "Mom", "Dad", "Child"
+- **Colors** — each genome gets an assigned color (cyan, violet, amber, green, rose) for visual distinction
+- **Storage** — all genomes stored in memory during session. No persistence (privacy-first). Loading a new session starts fresh.
+- **Limits** — up to 5 genomes at once (UI gets cluttered beyond that)
 
 ---
 

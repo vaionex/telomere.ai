@@ -1,8 +1,23 @@
 <script>
   import RiskGauge from './RiskGauge.svelte';
+  import { genomes, compareMode } from '$lib/stores/genetic-data.js';
+  import { matchSnps } from '@telomere/snp-db';
 
   let { variants = [], emptyMessage = 'No variants found.' } = $props();
   let expandedSnp = $state(null);
+
+  // For compare mode: get genotypes from all loaded genomes for a given rsid
+  function getCompareData(rsid) {
+    return $genomes.map(g => {
+      const snp = g.snps.get(rsid);
+      return {
+        name: g.name,
+        color: g.color,
+        genotype: snp ? (snp.genotype || snp.allele1 + snp.allele2) : '—',
+        hasData: !!snp,
+      };
+    });
+  }
 
   function toggle(rsid) { expandedSnp = expandedSnp === rsid ? null : rsid; }
 
@@ -35,6 +50,23 @@
 
           {#if expandedSnp === snp.rsid}
             <div class="px-4 pb-4 pt-2 border-t border-white/5 space-y-4">
+              <!-- Compare mode: show all genomes side by side -->
+              {#if $compareMode && $genomes.length >= 2}
+                {@const compareData = getCompareData(snp.rsid)}
+                <div class="mb-2">
+                  <h4 class="text-xs font-medium text-text-tertiary uppercase tracking-wider mb-2">Family Comparison</h4>
+                  <div class="flex items-center gap-4 flex-wrap">
+                    {#each compareData as member}
+                      <div class="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/[0.03] border border-white/5">
+                        <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background: {member.color}"></span>
+                        <span class="text-xs text-text-secondary">{member.name}</span>
+                        <span class="font-mono text-sm font-bold {member.hasData ? 'text-accent-cyan' : 'text-text-tertiary'}">{member.genotype}</span>
+                      </div>
+                    {/each}
+                  </div>
+                </div>
+              {/if}
+
               <div class="grid sm:grid-cols-2 gap-4">
                 <div>
                   <div class="flex items-center gap-3">
