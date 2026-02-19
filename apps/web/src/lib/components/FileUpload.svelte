@@ -1,6 +1,6 @@
 <script>
   import { parseGeneticFile, parseVcfStream, shouldUseStreaming, detectFormatByExtension } from '@telomere/parsers';
-  import { SNP_MAP } from '@telomere/snp-db';
+  import { SNP_MAP, lookupSnp } from '@telomere/snp-db';
   import { addGenome } from '$lib/stores/genetic-data.js';
   import { goto } from '$app/navigation';
   import GenomeNamePrompt from './GenomeNamePrompt.svelte';
@@ -17,6 +17,8 @@
   let streamVariants = $state(0);
   let streamStartTime = $state(0);
   let estimatedTotal = $state(0);
+  let liveMatches = $state([]);
+  let liveCategoryCounts = $state({});
 
   $effect(() => {
     isTauri = typeof window !== 'undefined' && !!window.__TAURI_INTERNALS__;
@@ -24,6 +26,19 @@
 
   // Build SNP filter set from the snp-db for streaming optimization
   const snpFilterSet = new Set(SNP_MAP.keys());
+
+  function getRiskLevel(dbEntry, genotype) {
+    if (!dbEntry.riskAllele) return 'normal';
+    const alleles = genotype.split('');
+    const riskCount = alleles.filter(a => a === dbEntry.riskAllele).length;
+    if (riskCount >= 2) return 'high';
+    if (riskCount === 1) return 'moderate';
+    return 'normal';
+  }
+
+  const riskColors = { high: 'text-red-600 bg-red-50', moderate: 'text-amber-600 bg-amber-50', normal: 'text-green-600 bg-green-50' };
+  const riskLabels = { high: 'High Risk', moderate: 'Moderate', normal: 'Normal' };
+  const categoryIcons = { health: 'H', longevity: 'L', nutrition: 'N', pharma: 'Rx', traits: 'T', carrier: 'C' };
 
   async function processContent(text, name) {
     errorMsg = '';
@@ -78,6 +93,8 @@
       progress = 5;
       streamVariants = 0;
       streamStartTime = Date.now();
+      liveMatches = [];
+      liveCategoryCounts = {};
       // Estimate total variants based on file size (~1 variant per 200 bytes for compressed, ~200 bytes for raw)
       const isGz = file.name.endsWith('.gz') || file.name.endsWith('.bgz');
       estimatedTotal = Math.round(file.size / (isGz ? 60 : 200));
@@ -86,9 +103,19 @@
         snpFilter: snpFilterSet,
         onProgress(count) {
           streamVariants = count;
-          // Progress: 5% to 90% based on estimated total
           const pct = Math.min(90, 5 + (count / Math.max(estimatedTotal, 1)) * 85);
           progress = Math.round(pct);
+        },
+        onMatch(rsid, snpData) {
+          const dbEntry = lookupSnp(rsid);
+          if (!dbEntry) return;
+          snpsFound++;
+          const riskLevel = getRiskLevel(dbEntry, snpData.genotype);
+          const match = { rsid, gene: dbEntry.gene, trait: dbEntry.trait, genotype: snpData.genotype, riskLevel, categories: dbEntry.categories };
+          liveMatches = [...liveMatches, match];
+          for (const cat of dbEntry.categories) {
+            liveCategoryCounts = { ...liveCategoryCounts, [cat]: (liveCategoryCounts[cat] || 0) + 1 };
+          }
         }
       });
 
@@ -199,7 +226,7 @@
     else document.getElementById('file-input')?.click();
   }
 
-  function reset() { phase = 'idle'; progress = 0; errorMsg = ''; snpsFound = 0; parsedSnps = null; parsedMeta = null; streamVariants = 0; }
+  function reset() { phase = 'idle'; progress = 0; errorMsg = ''; snpsFound = 0; parsedSnps = null; parsedMeta = null; streamVariants = 0; liveMatches = []; liveCategoryCounts = {}; }
 
   function onNameChosen(name) {
     if (parsedSnps && parsedMeta) {
@@ -321,6 +348,38 @@
       </div>
     {/if}
   </button>
+
+  <!-- Live results panel (visible during streaming) -->
+  {#if phase === 'streaming' && liveMatches.length > 0}
+    <div class="space-y-4 animate-in">
+      <!-- Category counts bar -->
+      <div class="flex flex-wrap gap-2">
+        {#each Object.entries(liveCategoryCounts) as [cat, count]}
+          <span class="px-3 py-1.5 rounded-lg text-xs font-medium bg-white/80 border border-black/5 text-text-primary capitalize">
+            {cat} <span class="ml-1 text-accent-blue font-bold">{count}</span>
+          </span>
+        {/each}
+      </div>
+
+      <!-- Live match feed -->
+      <div class="max-h-80 overflow-y-auto space-y-2 pr-1">
+        {#each liveMatches.toReversed().slice(0, 30) as match (match.rsid)}
+          <div class="card !p-3 flex items-center gap-3 text-sm">
+            <span class="px-2 py-0.5 rounded text-xs font-medium {riskColors[match.riskLevel]}">
+              {riskLabels[match.riskLevel]}
+            </span>
+            <span class="font-mono text-accent-blue text-xs">{match.rsid}</span>
+            <span class="font-semibold text-text-primary">{match.gene}</span>
+            <span class="text-text-secondary text-xs truncate flex-1">{match.trait}</span>
+            <span class="font-mono text-xs text-text-tertiary">{match.genotype}</span>
+          </div>
+        {/each}
+        {#if liveMatches.length > 30}
+          <p class="text-center text-xs text-text-tertiary py-2">+ {liveMatches.length - 30} more matches...</p>
+        {/if}
+      </div>
+    </div>
+  {/if}
   {/if}
 
   <!-- Error state -->

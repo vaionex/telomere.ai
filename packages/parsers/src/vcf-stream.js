@@ -63,9 +63,10 @@ function parseVcfLine(line) {
  * @param {object} options
  * @param {function} [options.onProgress] - Called every ~100k lines with (lineCount)
  * @param {Set} [options.snpFilter] - If provided, only retain variants whose rsid is in this set
+ * @param {function} [options.onMatch] - Called immediately when a SNP match is found with (rsid, snpData)
  * @returns {Promise<{ format, snps: Map, metadata }>}
  */
-export async function parseVcfStream(file, { onProgress, snpFilter } = {}) {
+export async function parseVcfStream(file, { onProgress, snpFilter, onMatch } = {}) {
   const isGzipped = file.name.endsWith('.gz') || file.name.endsWith('.bgz');
   let stream = file.stream();
   if (isGzipped) {
@@ -121,13 +122,15 @@ export async function parseVcfStream(file, { onProgress, snpFilter } = {}) {
       if (!parsed) continue;
 
       chromosomes.add(parsed.chromosome);
-      snps.set(parsed.rsid, {
+      const snpData = {
         chromosome: parsed.chromosome,
         position: parsed.position,
         genotype: parsed.genotype,
         allele1: parsed.allele1,
         allele2: parsed.allele2
-      });
+      };
+      snps.set(parsed.rsid, snpData);
+      if (onMatch) onMatch(parsed.rsid, snpData);
     }
   }
 
@@ -138,13 +141,15 @@ export async function parseVcfStream(file, { onProgress, snpFilter } = {}) {
     if (parsed) {
       if (!snpFilter || snpFilter.has(parsed.rsid)) {
         chromosomes.add(parsed.chromosome);
-        snps.set(parsed.rsid, {
+        const snpData = {
           chromosome: parsed.chromosome,
           position: parsed.position,
           genotype: parsed.genotype,
           allele1: parsed.allele1,
           allele2: parsed.allele2
-        });
+        };
+        snps.set(parsed.rsid, snpData);
+        if (onMatch) onMatch(parsed.rsid, snpData);
       }
     }
   }
