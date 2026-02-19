@@ -36,8 +36,8 @@
 
     <!-- Supported formats -->
     <div class="text-center text-xs text-text-tertiary space-y-1">
-      <p>Supports 23andMe, AncestryDNA, MyHeritage, and VCF files up to 50MB</p>
-      <p>Your file is read entirely in your browser and never transmitted</p>
+      <p>Supports 23andMe, AncestryDNA, MyHeritage, and VCF files (including 30x WGS .vcf.gz)</p>
+      <p>Your file is processed entirely in your browser and never transmitted</p>
     </div>
   </div>
 </section>

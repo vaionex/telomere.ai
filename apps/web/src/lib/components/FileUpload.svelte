@@ -1,11 +1,12 @@
 <script>
-  import { parseGeneticFile } from '@telomere/parsers';
+  import { parseGeneticFile, parseVcfStream, shouldUseStreaming, detectFormatByExtension } from '@telomere/parsers';
+  import { SNP_MAP } from '@telomere/snp-db';
   import { addGenome } from '$lib/stores/genetic-data.js';
   import { goto } from '$app/navigation';
   import GenomeNamePrompt from './GenomeNamePrompt.svelte';
 
   let dragover = $state(false);
-  let phase = $state('idle'); // idle | reading | parsing | matching | naming | error
+  let phase = $state('idle'); // idle | reading | parsing | streaming | matching | naming | error
   let progress = $state(0);
   let snpsFound = $state(0);
   let errorMsg = $state('');
@@ -13,10 +14,16 @@
   let fileName = $state('');
   let parsedSnps = $state(null);
   let parsedMeta = $state(null);
+  let streamVariants = $state(0);
+  let streamStartTime = $state(0);
+  let estimatedTotal = $state(0);
 
   $effect(() => {
     isTauri = typeof window !== 'undefined' && !!window.__TAURI_INTERNALS__;
   });
+
+  // Build SNP filter set from the snp-db for streaming optimization
+  const snpFilterSet = new Set(SNP_MAP.keys());
 
   async function processContent(text, name) {
     errorMsg = '';
@@ -62,7 +69,71 @@
     }
   }
 
+  async function processStream(file) {
+    errorMsg = '';
+    fileName = file.name;
+
+    try {
+      phase = 'streaming';
+      progress = 5;
+      streamVariants = 0;
+      streamStartTime = Date.now();
+      // Estimate total variants based on file size (~1 variant per 200 bytes for compressed, ~200 bytes for raw)
+      const isGz = file.name.endsWith('.gz') || file.name.endsWith('.bgz');
+      estimatedTotal = Math.round(file.size / (isGz ? 60 : 200));
+
+      const result = await parseVcfStream(file, {
+        snpFilter: snpFilterSet,
+        onProgress(count) {
+          streamVariants = count;
+          // Progress: 5% to 90% based on estimated total
+          const pct = Math.min(90, 5 + (count / Math.max(estimatedTotal, 1)) * 85);
+          progress = Math.round(pct);
+        }
+      });
+
+      streamVariants = result.metadata.totalVariants;
+      snpsFound = result.metadata.totalSnps;
+      progress = 95;
+      phase = 'matching';
+      await tick(200);
+
+      parsedSnps = result.snps;
+      parsedMeta = {
+        format: result.format,
+        totalSnps: result.metadata.totalSnps,
+        chromosomeCount: result.metadata.chromosomeCount,
+        buildVersion: result.metadata.buildVersion,
+        totalVariants: result.metadata.totalVariants,
+        fileName: file.name
+      };
+
+      progress = 100;
+      phase = 'naming';
+    } catch (e) {
+      errorMsg = e.message || 'Failed to parse file. Make sure it\'s a valid genetic data file.';
+      phase = 'error';
+      progress = 0;
+    }
+  }
+
   function tick(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+  function formatNumber(n) {
+    if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
+    if (n >= 1000) return (n / 1000).toFixed(0) + 'K';
+    return n.toString();
+  }
+
+  function getEta() {
+    if (streamVariants < 10000 || !streamStartTime) return '';
+    const elapsed = (Date.now() - streamStartTime) / 1000;
+    const rate = streamVariants / elapsed;
+    const remaining = Math.max(0, estimatedTotal - streamVariants);
+    const etaSec = Math.round(remaining / rate);
+    if (etaSec < 60) return `~${etaSec}s remaining`;
+    return `~${Math.round(etaSec / 60)}m remaining`;
+  }
 
   async function openTauriDialog() {
     try {
@@ -72,7 +143,7 @@
         title: 'Open Genetic Data File',
         multiple: false,
         filters: [
-          { name: 'Genetic Data', extensions: ['txt', 'csv', 'vcf', 'tsv'] },
+          { name: 'Genetic Data', extensions: ['txt', 'csv', 'vcf', 'vcf.gz', 'bgz', 'tsv'] },
           { name: 'All Files', extensions: ['*'] }
         ]
       });
@@ -90,13 +161,24 @@
 
   async function handleBrowserFile(file) {
     if (!file) return;
-    const valid = ['.txt', '.csv', '.vcf', '.tsv', '.zip'];
-    const ext = '.' + file.name.split('.').pop()?.toLowerCase();
-    if (!valid.includes(ext)) {
-      errorMsg = `Unsupported file type "${ext}". Use .txt, .csv, .vcf, or .tsv files.`;
+    const name = file.name.toLowerCase();
+    const valid = ['.txt', '.csv', '.vcf', '.tsv', '.zip', '.gz', '.bgz'];
+    const hasValidExt = valid.some(ext => name.endsWith(ext));
+    if (!hasValidExt) {
+      errorMsg = `Unsupported file type. Use .txt, .csv, .vcf, .vcf.gz, .bgz, or .tsv files.`;
       phase = 'error';
       return;
     }
+
+    // For large files or gzipped VCFs, use streaming parser
+    if (shouldUseStreaming(file)) {
+      const fmt = detectFormatByExtension(file.name);
+      if (fmt === 'vcf') {
+        await processStream(file);
+        return;
+      }
+    }
+
     phase = 'reading';
     progress = 5;
     const text = await file.text();
@@ -117,7 +199,7 @@
     else document.getElementById('file-input')?.click();
   }
 
-  function reset() { phase = 'idle'; progress = 0; errorMsg = ''; snpsFound = 0; parsedSnps = null; parsedMeta = null; }
+  function reset() { phase = 'idle'; progress = 0; errorMsg = ''; snpsFound = 0; parsedSnps = null; parsedMeta = null; streamVariants = 0; }
 
   function onNameChosen(name) {
     if (parsedSnps && parsedMeta) {
@@ -129,6 +211,7 @@
   const phaseLabel = $derived({
     reading: 'Reading file...',
     parsing: `Parsing SNPs...`,
+    streaming: `Scanning variants... ${formatNumber(streamVariants)}${estimatedTotal > 0 ? ` of ~${formatNumber(estimatedTotal)}` : ''}`,
     matching: `Matching ${snpsFound.toLocaleString()} SNPs against database...`,
     done: 'Analysis complete!',
   }[phase] || '');
@@ -151,7 +234,7 @@
     ondrop={onDrop}
     onclick={handleClick}
   >
-    <input id="file-input" type="file" accept=".txt,.csv,.vcf,.tsv" class="hidden" onchange={onInput} />
+    <input id="file-input" type="file" accept=".txt,.csv,.vcf,.tsv,.gz,.bgz" class="hidden" onchange={onInput} />
 
     {#if phase === 'idle' || phase === 'error'}
       <!-- Idle state -->
@@ -179,7 +262,7 @@
         </div>
 
         <div class="flex items-center justify-center gap-3 flex-wrap">
-          {#each ['23andMe (.txt)', 'AncestryDNA (.txt)', 'MyHeritage (.csv)', 'VCF (.vcf)'] as fmt}
+          {#each ['23andMe (.txt)', 'AncestryDNA (.txt)', 'MyHeritage (.csv)', 'VCF (.vcf/.vcf.gz)'] as fmt}
             <span class="px-3 py-1 rounded-full text-xs glass text-text-tertiary">{fmt}</span>
           {/each}
         </div>
@@ -209,7 +292,12 @@
           <p class="text-text-primary font-semibold text-lg">{phaseLabel}</p>
           <p class="text-text-secondary text-sm mt-1">
             {#if fileName}<span class="font-mono text-accent-cyan">{fileName}</span> • {/if}
-            {#if snpsFound > 0}{snpsFound.toLocaleString()} SNPs found{/if}
+            {#if phase === 'streaming'}
+              {snpsFound > 0 ? `${snpsFound.toLocaleString()} matched SNPs` : 'Scanning...'}
+              {#if getEta()} • <span class="text-text-tertiary">{getEta()}</span>{/if}
+            {:else if snpsFound > 0}
+              {snpsFound.toLocaleString()} SNPs found
+            {/if}
           </p>
         </div>
 
@@ -222,8 +310,8 @@
             ></div>
           </div>
           <div class="flex justify-between mt-2 text-xs text-text-tertiary">
-            <span class="{phase === 'reading' || phase === 'parsing' || phase === 'matching' || phase === 'done' ? 'text-accent-cyan' : ''}">Read</span>
-            <span class="{phase === 'parsing' || phase === 'matching' || phase === 'done' ? 'text-accent-cyan' : ''}">Parse</span>
+            <span class="{phase === 'reading' || phase === 'parsing' || phase === 'streaming' || phase === 'matching' || phase === 'done' ? 'text-accent-cyan' : ''}">Read</span>
+            <span class="{phase === 'parsing' || phase === 'streaming' || phase === 'matching' || phase === 'done' ? 'text-accent-cyan' : ''}">Parse</span>
             <span class="{phase === 'matching' || phase === 'done' ? 'text-accent-cyan' : ''}">Match</span>
             <span class="{phase === 'done' ? 'text-accent-green' : ''}">Done</span>
           </div>
