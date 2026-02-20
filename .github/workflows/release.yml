@@ -42,76 +42,40 @@ jobs:
       - name: Install frontend dependencies
         run: pnpm install --no-frozen-lockfile
 
+      - name: Install Tauri CLI
+        run: pnpm add -Dw @tauri-apps/cli
+
+      - name: Build frontend
+        run: pnpm --filter @telomere/web build
+
       - name: Build Tauri app
-        uses: tauri-apps/tauri-action@v0
+        run: pnpm tauri build
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CI: true
+
+      - name: List artifacts
+        run: find src-tauri/target/release/bundle -type f \( -name "*.deb" -o -name "*.AppImage" -o -name "*.rpm" \) ! -name "*.sig" | head -20
+
+      - name: Create Release & Upload
+        uses: softprops/action-gh-release@v2
         with:
-          tagName: ${{ github.ref_name }}
-          releaseName: 'Telomere AI ${{ github.ref_name }}'
-          releaseBody: |
+          tag_name: ${{ github.ref_name }}
+          name: 'Telomere AI ${{ github.ref_name }}'
+          body: |
             Free, open-source genetic analysis desktop app.
             
             **Download for your platform:**
-            - `.deb` / `.AppImage` — Linux
+            - `.deb` — Debian/Ubuntu
+            - `.AppImage` — Universal Linux
+            - `.rpm` — Fedora/RHEL
             
             macOS and Windows builds coming soon.
             
             Your DNA never leaves your computer.
-          releaseDraft: false
+          draft: false
           prerelease: false
-          includeUpdaterJson: false
-
-  # Uncomment these after Linux builds succeed:
-  # build-macos:
-  #   needs: build-linux
-  #   strategy:
-  #     matrix:
-  #       include:
-  #         - platform: macos-latest
-  #           target: aarch64-apple-darwin
-  #         - platform: macos-13
-  #           target: x86_64-apple-darwin
-  #   runs-on: ${{ matrix.platform }}
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: pnpm/action-setup@v4
-  #       with: { version: 9 }
-  #     - uses: actions/setup-node@v4
-  #       with: { node-version: 22, cache: pnpm }
-  #     - uses: dtolnay/rust-toolchain@stable
-  #       with: { targets: '${{ matrix.target }}' }
-  #     - uses: swatinem/rust-cache@v2
-  #       with: { workspaces: src-tauri }
-  #     - run: pnpm install --no-frozen-lockfile
-  #     - uses: tauri-apps/tauri-action@v0
-  #       env: { GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}' }
-  #       with:
-  #         tagName: ${{ github.ref_name }}
-  #         releaseName: 'Telomere AI ${{ github.ref_name }}'
-  #         releaseBody: ''
-  #         releaseDraft: false
-  #         prerelease: false
-  #         args: --target ${{ matrix.target }}
-
-  # build-windows:
-  #   needs: build-linux
-  #   runs-on: windows-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: pnpm/action-setup@v4
-  #       with: { version: 9 }
-  #     - uses: actions/setup-node@v4
-  #       with: { node-version: 22, cache: pnpm }
-  #     - uses: dtolnay/rust-toolchain@stable
-  #     - uses: swatinem/rust-cache@v2
-  #       with: { workspaces: src-tauri }
-  #     - run: pnpm install --no-frozen-lockfile
-  #     - uses: tauri-apps/tauri-action@v0
-  #       env: { GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}' }
-  #       with:
-  #         tagName: ${{ github.ref_name }}
-  #         releaseName: 'Telomere AI ${{ github.ref_name }}'
-  #         releaseBody: ''
-  #         releaseDraft: false
-  #         prerelease: false
+          files: |
+            src-tauri/target/release/bundle/deb/*.deb
+            src-tauri/target/release/bundle/appimage/*.AppImage
+            src-tauri/target/release/bundle/rpm/*.rpm
+          fail_on_unmatched_files: false
