@@ -1,6 +1,6 @@
 <div class="dna-helix" aria-hidden="true">
   {#each Array(20) as _, i}
-    <div class="dna-pair" style="--i: {i}; --delay: {i * 0.15}s">
+    <div class="dna-pair" style="--i: {i}; --delay: {i * -0.15}s">
       <div class="dna-dot dna-dot-left"></div>
       <div class="dna-bridge"></div>
       <div class="dna-dot dna-dot-right"></div>
