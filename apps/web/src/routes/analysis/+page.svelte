@@ -244,7 +244,9 @@
         <h2 class="text-sm font-semibold text-[var(--color-text-primary)]">Polygenic Risk Scores</h2>
         <div class="space-y-2">
           {#each pgs.slice(0, 3) as result}
-            <button onclick={() => { activeSection.set('riskscores'); }} class="card w-full text-left !p-3 flex items-center gap-3">
+            {@const traitSlug = result.trait.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}
+            {@const matchedTrait = traits.find(t => t.id === traitSlug || t.name.toLowerCase() === result.trait.toLowerCase())}
+            <a href={matchedTrait ? `/analysis/${matchedTrait.id}` : null} onclick={(e) => { if (!matchedTrait) { e.preventDefault(); activeSection.set('riskscores'); } }} class="card w-full text-left !p-3 flex items-center gap-3">
               <div class="flex-1 min-w-0">
                 <p class="text-sm font-medium text-[var(--color-text-primary)] truncate">{result.trait}</p>
                 <p class="text-[11px] text-[var(--color-text-tertiary)]">{result.variantsUsed}/{result.variantsTotal} variants</p>
@@ -259,7 +261,7 @@
                 </div>
               </div>
               <svg class="w-4 h-4 text-[var(--color-text-tertiary)] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-            </button>
+            </a>
           {/each}
         </div>
       </div>
@@ -380,13 +382,20 @@
       {:else}
         <div class="space-y-2">
           {#each pgs as result}
-            <div class="card w-full text-left !p-4 space-y-2">
+            {@const traitSlug = result.trait.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}
+            {@const matchedTrait = traits.find(t => t.id === traitSlug || t.name.toLowerCase() === result.trait.toLowerCase())}
+            <a href={matchedTrait ? `/analysis/${matchedTrait.id}` : null} class="card w-full text-left !p-4 space-y-2 block {matchedTrait ? 'hover:border-blue-200 cursor-pointer' : ''}">
               <div class="flex items-center justify-between">
                 <div>
-                  <p class="text-sm font-semibold text-[var(--color-text-primary)]">{result.trait}</p>
+                  <p class="text-sm font-semibold text-[var(--color-text-primary)] {matchedTrait ? 'group-hover:text-blue-600' : ''}">{result.trait}</p>
                   <p class="text-[11px] text-[var(--color-text-tertiary)]">{result.description}</p>
                 </div>
-                <span class="text-xs font-medium px-2 py-0.5 rounded-full {result.percentile >= 70 ? 'text-red-600 bg-red-50' : result.percentile >= 30 ? 'text-amber-600 bg-amber-50' : 'text-green-600 bg-green-50'}">{result.percentile >= 70 ? 'Elevated' : result.percentile >= 30 ? 'Average' : 'Below avg'}</span>
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-medium px-2 py-0.5 rounded-full {result.percentile >= 70 ? 'text-red-600 bg-red-50' : result.percentile >= 30 ? 'text-amber-600 bg-amber-50' : 'text-green-600 bg-green-50'}">{result.percentile >= 70 ? 'Elevated' : result.percentile >= 30 ? 'Average' : 'Below avg'}</span>
+                  {#if matchedTrait}
+                    <svg class="w-4 h-4 text-[var(--color-text-tertiary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                  {/if}
+                </div>
               </div>
               <div class="space-y-1">
                 <div class="flex items-center justify-between text-[10px]">
@@ -397,7 +406,7 @@
                   <div class="h-full rounded-full transition-all {result.percentile >= 70 ? 'bg-red-500' : result.percentile >= 30 ? 'bg-amber-500' : 'bg-green-500'}" style="width: {result.percentile}%"></div>
                 </div>
               </div>
-            </div>
+            </a>
           {/each}
         </div>
       {/if}
