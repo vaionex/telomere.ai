@@ -183,6 +183,46 @@ export const CONDITION_MERGES = {
   "Iron overload": "Hereditary hemochromatosis",
   "Compound hemochromatosis risk": "Hereditary hemochromatosis",
   "Mild iron elevation": "Hereditary hemochromatosis",
+  "Liver iron overload": "Hereditary hemochromatosis",
+
+  // Liver
+  "Non-alcoholic fatty liver disease": "Fatty liver disease (NAFLD)",
+  "NASH": "Fatty liver disease (NAFLD)",
+  "Hepatic steatosis": "Fatty liver disease (NAFLD)",
+  "Liver fibrosis": "Fatty liver disease (NAFLD)",
+
+  // Kidney
+  "Nephrolithiasis": "Kidney stones",
+  "Hypercalciuria": "Kidney stones",
+  "Cystine kidney stones": "Kidney stones",
+
+  // Scoliosis
+  "Spinal curvature": "Adolescent idiopathic scoliosis",
+
+  // Eczema/Atopic
+  "Skin barrier dysfunction": "Atopic dermatitis",
+  "Eczema": "Atopic dermatitis",
+  "Asthma risk (atopic march)": "Atopic dermatitis",
+
+  // Psoriasis
+  "Autoimmune skin disease": "Psoriasis",
+  "Psoriatic arthritis": "Psoriasis",
+
+  // Endometriosis
+  "Fertility complications": "Endometriosis",
+
+  // Glaucoma
+  "Intraocular pressure elevation": "Glaucoma",
+  "Primary open-angle glaucoma": "Glaucoma",
+  "Open-angle glaucoma": "Glaucoma",
+  "Elevated intraocular pressure": "Glaucoma",
+
+  // Autoimmune merge
+  "Autoimmune susceptibility": "Autoimmune disease",
+
+  // Ankylosing spondylitis
+  "Axial spondyloarthritis": "Ankylosing spondylitis",
+  "Ankylosing spondylitis (protective)": "Ankylosing spondylitis",
 
   // Venous
   "Venous thrombosis risk": "Venous thromboembolism",
