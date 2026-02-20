@@ -1,12 +1,10 @@
 <script>
-  export const ssr = false;
-  export const prerender = false;
-
   import { goto } from '$app/navigation';
   import { page } from '$app/stores';
   import { isLoaded } from '$lib/stores/genetic-data.js';
   import { traitResults } from '$lib/stores/reports.js';
   import { generateSummary } from '$lib/utils/traits.js';
+  import { activeSection } from '$lib/stores/navigation.js';
   import { get } from 'svelte/store';
 
   let trait = $state(null);
@@ -27,6 +25,7 @@
     const traits = get(traitResults);
     trait = traits.find(t => t.id === id) || null;
     if (!trait && typeof window !== 'undefined') goto('/analysis');
+    if (trait && trait.categories?.length > 0) activeSection.set(trait.categories[0]);
   }
 
   // Lazy-load trait descriptions (2MB file) only when needed
