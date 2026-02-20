@@ -253,7 +253,7 @@ fn parse_myheritage(reader: impl BufRead) -> ParseResult {
 fn open_file(path: &str) -> Result<(Box<dyn BufRead>, bool), String> {
     // Read first 2 bytes to check for gzip magic
     let mut header = [0u8; 2];
-    let _file = File::open(path).map_err(|e| format!("Failed to open file: {}", e))?;
+    let file = File::open(path).map_err(|e| format!("Failed to open file: {}", e))?;
     {
         let mut peek = File::open(path).map_err(|e| format!("Failed to open file: {}", e))?;
         use std::io::Read;
