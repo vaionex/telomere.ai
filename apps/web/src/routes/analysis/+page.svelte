@@ -5,7 +5,7 @@
   import { goto } from '$app/navigation';
   import { page } from '$app/stores';
   import { onDestroy } from 'svelte';
-  import { isLoaded, rawSnps, genomes, activeGenome, setActiveGenome, activeGenomeIndex } from '$lib/stores/genetic-data.js';
+  import { isLoaded, rawSnps, genomes, activeGenome, setActiveGenome, activeGenomeIndex, removeGenome } from '$lib/stores/genetic-data.js';
   import { matchedSnps, reportsByCategory, categoryMeta, pgsResults, categoryRiskSummary, topFindings, traitResults } from '$lib/stores/reports.js';
   import { filterTraitsByCategory } from '$lib/utils/traits.js';
   import { exportMatchedSnpsCsv, exportReport } from '$lib/utils/export.js';
@@ -209,10 +209,19 @@
         <p class="text-[10px] font-semibold uppercase tracking-wider text-[var(--color-text-tertiary)] mb-2">Genome</p>
         <div class="flex flex-col gap-1">
           {#each genomesVal as genome, i}
-            <button
-              onclick={() => setActiveGenome(i)}
-              class="text-left px-2.5 py-1.5 rounded-md text-xs transition-colors truncate {i === activeGenomeIdx ? 'bg-blue-50 text-blue-700 font-medium' : 'text-[var(--color-text-secondary)] hover:bg-black/[0.03]'}"
-            >{genome.name || `Genome ${i + 1}`}</button>
+            <div class="group flex items-center gap-1">
+              <button
+                onclick={() => setActiveGenome(i)}
+                class="flex-1 text-left px-2.5 py-1.5 rounded-md text-xs transition-colors truncate {i === activeGenomeIdx ? 'bg-blue-50 text-blue-700 font-medium' : 'text-[var(--color-text-secondary)] hover:bg-black/[0.03]'}"
+              >{genome.name || `Genome ${i + 1}`}</button>
+              <button
+                onclick={() => { removeGenome(i); genomesVal = get(genomes); activeGenomeIdx = get(activeGenomeIndex); genomeName = get(activeGenome)?.name || ''; }}
+                class="opacity-0 group-hover:opacity-100 p-1 rounded text-[var(--color-text-tertiary)] hover:text-red-500 hover:bg-red-50 transition-all"
+                title="Remove genome"
+              >
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+              </button>
+            </div>
           {/each}
         </div>
       </div>
