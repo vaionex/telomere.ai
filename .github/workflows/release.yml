@@ -60,6 +60,7 @@ jobs:
             Your DNA never leaves your computer.
           releaseDraft: false
           prerelease: false
+          includeUpdaterJson: false
 
   # Uncomment these after Linux builds succeed:
   # build-macos:

@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
-use std::io::{BufRead, BufReader, Read};
+use std::io::{BufRead, BufReader};
 use std::fs::File;
 use flate2::read::GzDecoder;
 
@@ -24,7 +24,7 @@ pub struct ParseResult {
     pub is_wgs: bool,
 }
 
-fn detect_format(first_bytes: &[u8], first_lines: &[String]) -> &'static str {
+fn _detect_format(first_bytes: &[u8], first_lines: &[String]) -> &'static str {
     // Check for gzip magic bytes
     if first_bytes.len() >= 2 && first_bytes[0] == 0x1f && first_bytes[1] == 0x8b {
         return "gzip";
@@ -251,11 +251,9 @@ fn parse_myheritage(reader: impl BufRead) -> ParseResult {
 
 /// Creates a buffered reader, handling both plain text and gzipped files.
 fn open_file(path: &str) -> Result<(Box<dyn BufRead>, bool), String> {
-    let file = File::open(path).map_err(|e| format!("Failed to open file: {}", e))?;
-
     // Read first 2 bytes to check for gzip magic
     let mut header = [0u8; 2];
-    let file = File::open(path).map_err(|e| format!("Failed to open file: {}", e))?;
+    let _file = File::open(path).map_err(|e| format!("Failed to open file: {}", e))?;
     {
         let mut peek = File::open(path).map_err(|e| format!("Failed to open file: {}", e))?;
         use std::io::Read;
@@ -277,7 +275,7 @@ fn open_file(path: &str) -> Result<(Box<dyn BufRead>, bool), String> {
 #[tauri::command]
 pub async fn parse_genetic_file(path: String) -> Result<ParseResult, String> {
     // Open with gzip detection
-    let (reader, is_gzip) = open_file(&path)?;
+    let (_reader, is_gzip) = open_file(&path)?;
 
     // Read first 20 lines for format detection
     // We need to re-open for this since we consumed the reader
