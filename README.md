@@ -1,8 +1,8 @@
 # 🧬 Telomere AI
 
-**Free, open-source genetic analysis that runs entirely on your computer.**
+**Free, open-source genetic analysis platform. Your DNA never leaves your device.**
 
-Decode your 23andMe, AncestryDNA, MyHeritage, or VCF data. Get detailed health reports in seconds — with zero data ever leaving your machine.
+Analyze your 23andMe, AncestryDNA, MyHeritage, or VCF data directly in your browser at [telomere.ai](https://telomere.ai) — or download the desktop app for fully offline use.
 
 <p align="center">
   <a href="https://telomere.ai">Website</a> •
@@ -17,18 +17,18 @@ Decode your 23andMe, AncestryDNA, MyHeritage, or VCF data. Get detailed health r
 | | Telomere AI | SelfDecode | Promethease |
 |---|---|---|---|
 | **Price** | Free | $297/yr | $12 |
-| **Privacy** | 100% offline | Cloud-based | Cloud-based |
+| **Privacy** | 100% local (browser or desktop) | Cloud-based | Cloud-based |
 | **Open Source** | ✓ | ✗ | ✗ |
-| **SNP Database** | 257+ curated | Proprietary | SNPedia |
+| **SNP Database** | 378+ curated | Proprietary | SNPedia |
 | **AI Reports** | ✓ (local) | ✓ | ✗ |
 
 ## Features
 
 - **6 Report Categories** — Health risks, longevity/aging, nutrigenomics, pharmacogenomics, physical traits, carrier status
-- **257+ Curated SNPs** — Real clinical data from ClinVar, PharmGKB, and peer-reviewed GWAS studies
+- **378+ Curated SNPs** — Real clinical data from ClinVar, PharmGKB, and peer-reviewed GWAS studies
 - **All Major Formats** — 23andMe, AncestryDNA, MyHeritage CSV, VCF 4.x
-- **Native Performance** — Rust-powered parsing handles 600,000+ SNPs in under 2 seconds
-- **Zero Network Access** — The app never connects to the internet. Period.
+- **Browser or Desktop** — Use at [telomere.ai](https://telomere.ai) instantly, or download the desktop app for offline use
+- **Zero Network Access** — All analysis happens locally. Your genetic data never leaves your device.
 - **Polygenic Risk Scores** — Offline PGS calculator with bundled scoring files
 
 ## Download

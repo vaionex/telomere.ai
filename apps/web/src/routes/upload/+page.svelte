@@ -58,5 +58,14 @@
       <p>Supports 23andMe, AncestryDNA, MyHeritage, and VCF files (including 30x WGS .vcf.gz)</p>
       <p>Your file is processed entirely in your browser and never transmitted</p>
     </div>
+
+    <!-- Desktop app note -->
+    <div class="text-center">
+      <p class="text-xs text-text-tertiary">
+        Prefer offline?
+        <a href="/download" class="text-accent-blue hover:underline">Download the desktop app</a>
+        for Windows, macOS, and Linux.
+      </p>
+    </div>
   </div>
 </section>
