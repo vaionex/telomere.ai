@@ -28,16 +28,13 @@ jobs:
       - run: pnpm --filter @telomere/web build
       - run: pnpm tauri build
         env: { CI: true }
-      - name: Find artifacts
-        id: find
+      - name: Collect artifacts
         run: |
-          echo "=== All bundle files ==="
-          find . -path "*/release/bundle/*" -type f ! -name "*.sig" | sort
-          echo "artifacts<<EOF" >> $GITHUB_OUTPUT
-          find . -path "*/release/bundle/deb/*.deb" -type f ! -name "*.sig" >> $GITHUB_OUTPUT
-          find . -path "*/release/bundle/appimage/*.AppImage" -type f ! -name "*.sig" >> $GITHUB_OUTPUT
-          find . -path "*/release/bundle/rpm/*.rpm" -type f ! -name "*.sig" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          mkdir -p artifacts
+          find . -path "*/release/bundle/deb/*.deb" -not -name "*.sig" -exec cp {} artifacts/ \;
+          find . -path "*/release/bundle/appimage/*.AppImage" -not -name "*.sig" -exec cp {} artifacts/ \;
+          find . -path "*/release/bundle/rpm/*.rpm" -not -name "*.sig" -exec cp {} artifacts/ \;
+          ls -la artifacts/
       - name: Upload artifacts
         uses: softprops/action-gh-release@v2
         with:
@@ -47,15 +44,14 @@ jobs:
             Free, open-source genetic analysis desktop app.
             
             **Download for your platform:**
-            - `.dmg` — macOS
+            - `.dmg` — macOS (Apple Silicon)
             - `.exe` / `.msi` — Windows
             - `.deb` / `.AppImage` / `.rpm` — Linux
             
             Your DNA never leaves your computer.
           draft: false
           prerelease: false
-          files: ${{ steps.find.outputs.artifacts }}
-          fail_on_unmatched_files: false
+          files: artifacts/*
 
   build-macos-arm:
     runs-on: macos-latest
@@ -74,14 +70,11 @@ jobs:
       - run: pnpm --filter @telomere/web build
       - run: pnpm tauri build --target aarch64-apple-darwin
         env: { CI: true }
-      - name: Find artifacts
-        id: find
+      - name: Collect artifacts
         run: |
-          echo "=== All bundle files ==="
-          find . -path "*/release/bundle/*" -type f ! -name "*.sig" | sort
-          echo "artifacts<<EOF" >> $GITHUB_OUTPUT
-          find . -path "*/release/bundle/dmg/*.dmg" -type f >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          mkdir -p artifacts
+          find . -path "*/release/bundle/dmg/*.dmg" -exec cp {} artifacts/ \;
+          ls -la artifacts/
       - name: Upload artifacts
         uses: softprops/action-gh-release@v2
         with:
@@ -89,8 +82,7 @@ jobs:
           name: 'Telomere AI ${{ github.ref_name }}'
           draft: false
           prerelease: false
-          files: ${{ steps.find.outputs.artifacts }}
-          fail_on_unmatched_files: false
+          files: artifacts/*
 
   build-windows:
     runs-on: windows-latest
@@ -108,16 +100,13 @@ jobs:
       - run: pnpm --filter @telomere/web build
       - run: pnpm tauri build
         env: { CI: true }
-      - name: Find artifacts
-        id: find
+      - name: Collect artifacts
         shell: bash
         run: |
-          echo "=== All bundle files ==="
-          find . -path "*/release/bundle/*" -type f ! -name "*.sig" | sort
-          echo "artifacts<<EOF" >> $GITHUB_OUTPUT
-          find . -path "*/release/bundle/nsis/*.exe" -type f ! -name "*.sig" >> $GITHUB_OUTPUT
-          find . -path "*/release/bundle/msi/*.msi" -type f ! -name "*.sig" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          mkdir -p artifacts
+          find . -path "*/release/bundle/nsis/*.exe" -not -name "*.sig" -exec cp {} artifacts/ \;
+          find . -path "*/release/bundle/msi/*.msi" -not -name "*.sig" -exec cp {} artifacts/ \;
+          ls -la artifacts/
       - name: Upload artifacts
         uses: softprops/action-gh-release@v2
         with:
@@ -125,5 +114,4 @@ jobs:
           name: 'Telomere AI ${{ github.ref_name }}'
           draft: false
           prerelease: false
-          files: ${{ steps.find.outputs.artifacts }}
-          fail_on_unmatched_files: false
+          files: artifacts/*
