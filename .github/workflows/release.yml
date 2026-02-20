@@ -92,41 +92,6 @@ jobs:
           files: ${{ steps.find.outputs.artifacts }}
           fail_on_unmatched_files: false
 
-  build-macos-intel:
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with: { version: 9 }
-      - uses: actions/setup-node@v4
-        with: { node-version: 22, cache: pnpm }
-      - uses: dtolnay/rust-toolchain@stable
-        with: { targets: x86_64-apple-darwin }
-      - uses: swatinem/rust-cache@v2
-        with: { workspaces: src-tauri }
-      - run: pnpm install --no-frozen-lockfile
-      - run: pnpm add -Dw @tauri-apps/cli
-      - run: pnpm --filter @telomere/web build
-      - run: pnpm tauri build --target x86_64-apple-darwin
-        env: { CI: true }
-      - name: Find artifacts
-        id: find
-        run: |
-          echo "=== All bundle files ==="
-          find . -path "*/release/bundle/*" -type f ! -name "*.sig" | sort
-          echo "artifacts<<EOF" >> $GITHUB_OUTPUT
-          find . -path "*/release/bundle/dmg/*.dmg" -type f >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-      - name: Upload artifacts
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ github.ref_name }}
-          name: 'Telomere AI ${{ github.ref_name }}'
-          draft: false
-          prerelease: false
-          files: ${{ steps.find.outputs.artifacts }}
-          fail_on_unmatched_files: false
-
   build-windows:
     runs-on: windows-latest
     steps:
