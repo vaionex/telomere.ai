@@ -28,6 +28,16 @@ jobs:
       - run: pnpm --filter @telomere/web build
       - run: pnpm tauri build
         env: { CI: true }
+      - name: Find artifacts
+        id: find
+        run: |
+          echo "=== All bundle files ==="
+          find . -path "*/release/bundle/*" -type f ! -name "*.sig" | sort
+          echo "artifacts<<EOF" >> $GITHUB_OUTPUT
+          find . -path "*/release/bundle/deb/*.deb" -type f ! -name "*.sig" >> $GITHUB_OUTPUT
+          find . -path "*/release/bundle/appimage/*.AppImage" -type f ! -name "*.sig" >> $GITHUB_OUTPUT
+          find . -path "*/release/bundle/rpm/*.rpm" -type f ! -name "*.sig" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
       - name: Upload artifacts
         uses: softprops/action-gh-release@v2
         with:
@@ -44,10 +54,7 @@ jobs:
             Your DNA never leaves your computer.
           draft: false
           prerelease: false
-          files: |
-            src-tauri/target/release/bundle/deb/*.deb
-            src-tauri/target/release/bundle/appimage/*.AppImage
-            src-tauri/target/release/bundle/rpm/*.rpm
+          files: ${{ steps.find.outputs.artifacts }}
           fail_on_unmatched_files: false
 
   build-macos-arm:
@@ -67,6 +74,14 @@ jobs:
       - run: pnpm --filter @telomere/web build
       - run: pnpm tauri build --target aarch64-apple-darwin
         env: { CI: true }
+      - name: Find artifacts
+        id: find
+        run: |
+          echo "=== All bundle files ==="
+          find . -path "*/release/bundle/*" -type f ! -name "*.sig" | sort
+          echo "artifacts<<EOF" >> $GITHUB_OUTPUT
+          find . -path "*/release/bundle/dmg/*.dmg" -type f >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
       - name: Upload artifacts
         uses: softprops/action-gh-release@v2
         with:
@@ -74,8 +89,7 @@ jobs:
           name: 'Telomere AI ${{ github.ref_name }}'
           draft: false
           prerelease: false
-          files: |
-            src-tauri/target/aarch64-apple-darwin/release/bundle/dmg/*.dmg
+          files: ${{ steps.find.outputs.artifacts }}
           fail_on_unmatched_files: false
 
   build-macos-intel:
@@ -95,6 +109,14 @@ jobs:
       - run: pnpm --filter @telomere/web build
       - run: pnpm tauri build --target x86_64-apple-darwin
         env: { CI: true }
+      - name: Find artifacts
+        id: find
+        run: |
+          echo "=== All bundle files ==="
+          find . -path "*/release/bundle/*" -type f ! -name "*.sig" | sort
+          echo "artifacts<<EOF" >> $GITHUB_OUTPUT
+          find . -path "*/release/bundle/dmg/*.dmg" -type f >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
       - name: Upload artifacts
         uses: softprops/action-gh-release@v2
         with:
@@ -102,8 +124,7 @@ jobs:
           name: 'Telomere AI ${{ github.ref_name }}'
           draft: false
           prerelease: false
-          files: |
-            src-tauri/target/x86_64-apple-darwin/release/bundle/dmg/*.dmg
+          files: ${{ steps.find.outputs.artifacts }}
           fail_on_unmatched_files: false
 
   build-windows:
@@ -122,6 +143,16 @@ jobs:
       - run: pnpm --filter @telomere/web build
       - run: pnpm tauri build
         env: { CI: true }
+      - name: Find artifacts
+        id: find
+        shell: bash
+        run: |
+          echo "=== All bundle files ==="
+          find . -path "*/release/bundle/*" -type f ! -name "*.sig" | sort
+          echo "artifacts<<EOF" >> $GITHUB_OUTPUT
+          find . -path "*/release/bundle/nsis/*.exe" -type f ! -name "*.sig" >> $GITHUB_OUTPUT
+          find . -path "*/release/bundle/msi/*.msi" -type f ! -name "*.sig" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
       - name: Upload artifacts
         uses: softprops/action-gh-release@v2
         with:
@@ -129,7 +160,5 @@ jobs:
           name: 'Telomere AI ${{ github.ref_name }}'
           draft: false
           prerelease: false
-          files: |
-            src-tauri/target/release/bundle/nsis/*.exe
-            src-tauri/target/release/bundle/msi/*.msi
+          files: ${{ steps.find.outputs.artifacts }}
           fail_on_unmatched_files: false
