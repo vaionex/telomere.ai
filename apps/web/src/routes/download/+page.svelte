@@ -1,9 +1,11 @@
 <script>
+  const version = '0.1.0';
   const platforms = [
     {
       name: 'Windows',
       icon: 'windows',
-      file: 'Telomere-AI-1.0.0-x64.msi',
+      file: `Telomere.AI_${version}_x64-setup.exe`,
+      alt: `Telomere.AI_${version}_x64_en-US.msi`,
       size: '~45 MB',
       req: 'Windows 10 or later',
       primary: true,
@@ -11,7 +13,7 @@
     {
       name: 'macOS (Apple Silicon)',
       icon: 'apple',
-      file: 'Telomere-AI-1.0.0-aarch64.dmg',
+      file: `Telomere.AI_${version}_aarch64.dmg`,
       size: '~42 MB',
       req: 'macOS 12 or later (M1/M2/M3)',
       primary: true,
@@ -19,7 +21,7 @@
     {
       name: 'macOS (Intel)',
       icon: 'apple',
-      file: 'Telomere-AI-1.0.0-x64.dmg',
+      file: `Telomere.AI_${version}_x64.dmg`,
       size: '~44 MB',
       req: 'macOS 12 or later (Intel)',
       primary: false,
@@ -27,7 +29,7 @@
     {
       name: 'Linux (AppImage)',
       icon: 'linux',
-      file: 'Telomere-AI-1.0.0-x86_64.AppImage',
+      file: `Telomere.AI_${version}_amd64.AppImage`,
       size: '~48 MB',
       req: 'Ubuntu 20.04+, Fedora 36+',
       primary: true,
@@ -35,7 +37,7 @@
     {
       name: 'Linux (.deb)',
       icon: 'linux',
-      file: 'telomere-ai_1.0.0_amd64.deb',
+      file: `telomere-ai_${version}_amd64.deb`,
       size: '~12 MB',
       req: 'Debian/Ubuntu',
       primary: false,
