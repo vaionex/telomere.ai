@@ -1,3 +1,40 @@
+<svelte:head>
+  <title>Telomere AI — Free Genetic Analysis | 330+ Health Markers from Your DNA</title>
+  <meta name="description" content="Upload your 23andMe, AncestryDNA, or whole-genome data for free, private genetic analysis. 330+ health markers including longevity, nutrition, drug response, and carrier status — processed 100% offline." />
+  <meta name="keywords" content="genetic analysis, DNA analysis, 23andMe, AncestryDNA, health risks, pharmacogenomics, nutrigenomics, SNP analysis, longevity, telomere, free genetic testing" />
+  <link rel="canonical" href="https://telomere.ai" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Telomere AI — Free Genetic Analysis | 330+ Health Markers" />
+  <meta property="og:description" content="Free, private genetic analysis from your 23andMe or AncestryDNA data. 330+ health markers processed entirely on your device." />
+  <meta property="og:url" content="https://telomere.ai" />
+  <meta property="og:site_name" content="Telomere AI" />
+  <meta property="og:image" content="https://telomere.ai/og-image.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Telomere AI — Free Genetic Analysis" />
+  <meta name="twitter:description" content="Upload your DNA data for free health analysis. 330+ markers, 100% offline, open-source." />
+  {@html `<script type="application/ld+json">${JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Telomere AI",
+    "applicationCategory": "HealthApplication",
+    "operatingSystem": "Windows, macOS, Linux",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "description": "Free, private genetic analysis tool. Analyze 330+ health markers from 23andMe, AncestryDNA, or whole-genome data — processed entirely offline.",
+    "url": "https://telomere.ai",
+    "author": { "@type": "Organization", "name": "Vaionex Corporation" }
+  })}</script>`}
+  {@html `<script type="application/ld+json">${JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      { "@type": "Question", "name": "Is Telomere AI really free?", "acceptedAnswer": { "@type": "Answer", "text": "Yes, completely free. Telomere AI is open-source software. Genetic insights should be accessible to everyone." }},
+      { "@type": "Question", "name": "Is my genetic data safe?", "acceptedAnswer": { "@type": "Answer", "text": "Your genetic data is processed entirely on your computer. Nothing is ever sent to any server. The app works fully offline." }},
+      { "@type": "Question", "name": "What file formats does Telomere AI support?", "acceptedAnswer": { "@type": "Answer", "text": "23andMe (.txt), AncestryDNA (.txt), MyHeritage (.csv), VCF 4.x (.vcf, .vcf.gz), and full whole-genome sequencing files up to 4GB+." }},
+      { "@type": "Question", "name": "How does Telomere AI compare to SelfDecode or Promethease?", "acceptedAnswer": { "@type": "Answer", "text": "SelfDecode costs $297/year and Promethease costs $12. Telomere AI offers comparable analysis for free, with a fully offline desktop app and open-source codebase." }}
+    ]
+  })}</script>`}
+</svelte:head>
+
 <script>
   import DnaHelix from '$lib/components/DnaHelix.svelte';
 
