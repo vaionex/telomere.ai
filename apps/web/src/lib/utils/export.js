@@ -56,7 +56,27 @@ export function exportReport(matchedSnps, pgsResults, genomeName) {
   downloadFile(text, `telomere-report-${genomeName || 'export'}.txt`, 'text/plain');
 }
 
-function downloadFile(content, filename, type) {
+async function downloadFile(content, filename, type) {
+  // In Tauri, use native save dialog
+  if (typeof window !== 'undefined' && window.__TAURI_INTERNALS__) {
+    try {
+      const { save } = await import('@tauri-apps/plugin-dialog');
+      const { writeTextFile } = await import('@tauri-apps/plugin-fs');
+      const ext = filename.split('.').pop();
+      const filePath = await save({
+        defaultPath: filename,
+        filters: [{ name: ext.toUpperCase() + ' Files', extensions: [ext] }]
+      });
+      if (filePath) {
+        await writeTextFile(filePath, content);
+      }
+      return;
+    } catch (e) {
+      console.warn('Tauri save failed, falling back to browser download:', e);
+    }
+  }
+
+  // Browser fallback
   const blob = new Blob([content], { type });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');

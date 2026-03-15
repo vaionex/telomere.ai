@@ -1,5 +1,5 @@
 <script>
-  const version = '0.3.0';
+  const version = '0.3.1';
   const platforms = [
     {
       name: 'Windows',
@@ -70,7 +70,7 @@
   <div class="text-center mb-16">
     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full glass text-xs text-accent-cyan mb-6">
       <span class="w-2 h-2 rounded-full bg-accent-green animate-pulse"></span>
-      v0.3.0 • Open Source • Free Forever
+      v0.3.1 • Open Source • Free Forever
     </div>
     <h1 class="text-4xl sm:text-5xl font-bold mb-4">Download <span class="gradient-text">Telomere AI</span></h1>
     <p class="text-text-secondary text-lg max-w-2xl mx-auto">A native desktop app that analyzes your genetic data entirely offline. No accounts, no uploads, no tracking.</p>

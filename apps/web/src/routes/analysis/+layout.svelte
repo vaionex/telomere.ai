@@ -9,6 +9,7 @@
   import { filterTraitsByCategory } from '$lib/utils/traits.js';
   import { exportMatchedSnpsCsv, exportReport } from '$lib/utils/export.js';
   import { activeSection, searchQuery } from '$lib/stores/navigation.js';
+  import { isTauri } from '$lib/stores/platform.js';
 
   let loaded = $state(false);
   let genomesVal = $state([]);
@@ -85,7 +86,8 @@
 </script>
 
 {#if loaded}
-<div class="flex max-w-7xl mx-auto px-4 sm:px-6 gap-6" role="main">
+<div class="flex {$isTauri ? 'px-6' : 'max-w-7xl mx-auto px-4 sm:px-6'} gap-6" role="main">
+  {#if !$isTauri}
   <aside class="hidden lg:flex flex-col w-56 flex-shrink-0 sticky top-4 self-start max-h-[calc(100vh-2rem)] overflow-y-auto py-4" aria-label="Analysis navigation">
     <!-- Genome switcher -->
     {#if genomesVal.length > 1}
@@ -200,6 +202,7 @@
       </button>
     </div>
   </aside>
+  {/if}
 
   <main class="flex-1 min-w-0 py-4 sm:py-6">
     {@render children()}

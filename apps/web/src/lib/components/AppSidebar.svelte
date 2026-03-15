@@ -1,7 +1,7 @@
 <script>
   import { page } from '$app/stores';
-  import { genomes, activeGenomeIndex, canCompare, compareMode, setActiveGenome, removeGenome, renameGenome } from '$lib/stores/genetic-data.js';
-  import { isLoaded } from '$lib/stores/genetic-data.js';
+  import { genomes, activeGenomeIndex, canCompare, compareMode, setActiveGenome, removeGenome, renameGenome, isLoaded } from '$lib/stores/genetic-data.js';
+  import { activeSection } from '$lib/stores/navigation.js';
   import { goto } from '$app/navigation';
   import { get } from 'svelte/store';
 
@@ -34,11 +34,27 @@
     window.addEventListener('keydown', handleKeydown);
   }
 
+  let currentSection = $state('overview');
+  const sectionUnsub = activeSection.subscribe(v => { currentSection = v; });
+  let dataLoaded = $state(false);
+  const loadedUnsub = isLoaded.subscribe(v => { dataLoaded = v; });
+
   const navItems = [
     { path: '/upload', label: 'Open File', icon: 'upload' },
     { path: '/analysis', label: 'Analysis', icon: 'analysis' },
     { path: '/compare', label: 'Compare', icon: 'compare', needsCompare: true },
     { path: '/explore', label: 'Explore SNPs', icon: 'explore' },
+  ];
+
+  const analysisSections = [
+    { id: 'overview', label: 'Overview', emoji: '📊' },
+    { id: 'health', label: 'Health Risks', emoji: '🏥' },
+    { id: 'pharma', label: 'Pharmacogenomics', emoji: '💊' },
+    { id: 'nutrition', label: 'Nutrigenomics', emoji: '🥗' },
+    { id: 'traits', label: 'Traits', emoji: '👤' },
+    { id: 'longevity', label: 'Longevity', emoji: '🧬' },
+    { id: 'carrier', label: 'Carrier Status', emoji: '🧪' },
+    { id: 'riskscores', label: 'Risk Scores', emoji: '📈' },
   ];
 
   function isActive(path) {
@@ -80,6 +96,22 @@
         </a>
       {/if}
     {/each}
+    <!-- Analysis sub-sections (show when on analysis page with data) -->
+    {#if dataLoaded && currentPath.startsWith('/analysis')}
+      <div class="mt-2 pt-2 border-t border-black/5">
+        <p class="px-3 text-[10px] font-semibold text-text-tertiary uppercase tracking-wider mb-1">Reports</p>
+        {#each analysisSections as section}
+          <button
+            onclick={() => { activeSection.set(section.id); goto('/analysis'); }}
+            class="w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs transition-all text-left
+              {currentSection === section.id ? 'bg-accent-blue/10 text-accent-blue font-medium' : 'text-text-secondary hover:text-text-primary hover:bg-black/[0.03]'}"
+          >
+            <span class="w-4 text-center text-[11px]">{section.emoji}</span>
+            {section.label}
+          </button>
+        {/each}
+      </div>
+    {/if}
   </nav>
 
   <!-- Loaded Genomes -->
