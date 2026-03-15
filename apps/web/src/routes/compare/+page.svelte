@@ -1,7 +1,4 @@
 <script>
-  export const ssr = false;
-  export const prerender = false;
-
   import { genomes, canCompare, activeGenomeIndex, setActiveGenome } from '$lib/stores/genetic-data.js';
   import { getAllSnps, getCategories, matchSnps } from '@telomere/snp-db';
   import { buildTraits, filterTraitsByCategory } from '$lib/utils/traits.js';
