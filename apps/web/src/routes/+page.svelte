@@ -37,6 +37,15 @@
 
 <script>
   import DnaHelix from '$lib/components/DnaHelix.svelte';
+  import { isTauri } from '$lib/stores/platform.js';
+  import { isLoaded } from '$lib/stores/genetic-data.js';
+  import { goto } from '$app/navigation';
+  import { get } from 'svelte/store';
+
+  // In Tauri, skip marketing — go straight to the tool
+  if (get(isTauri)) {
+    goto(get(isLoaded) ? '/analysis' : '/upload', { replaceState: true });
+  }
 
   let faqOpen = $state({});
   function toggleFaq(i) { faqOpen = { ...faqOpen, [i]: !faqOpen[i] }; }

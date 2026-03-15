@@ -2,6 +2,7 @@
   import FileUpload from '$lib/components/FileUpload.svelte';
   import { SAMPLE_GENOME } from '$lib/data/sample-genome.js';
   import { addGenome } from '$lib/stores/genetic-data.js';
+  import { isTauri } from '$lib/stores/platform.js';
   import { goto } from '$app/navigation';
 
   function loadDemo() {
@@ -32,8 +33,8 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
         </svg>
       </div>
-      <h2 class="text-lg font-bold text-text-primary">Your DNA never leaves your browser</h2>
-      <p class="text-text-secondary text-sm max-w-md mx-auto">Zero servers. Zero uploads. Your genome stays in your browser. All analysis runs locally using JavaScript — nothing is ever sent anywhere.</p>
+      <h2 class="text-lg font-bold text-text-primary">{$isTauri ? 'Your DNA never leaves your computer' : 'Your DNA never leaves your browser'}</h2>
+      <p class="text-text-secondary text-sm max-w-md mx-auto">{$isTauri ? 'Zero network access. Your genome stays on your machine. All analysis runs locally — nothing is ever sent anywhere.' : 'Zero servers. Zero uploads. Your genome stays in your browser. All analysis runs locally using JavaScript — nothing is ever sent anywhere.'}</p>
     </div>
 
     <!-- Header -->
@@ -56,10 +57,11 @@
     <!-- Supported formats -->
     <div class="text-center text-xs text-text-tertiary space-y-1">
       <p>Supports 23andMe, AncestryDNA, MyHeritage, and VCF files (including 30x WGS .vcf.gz)</p>
-      <p>Your file is processed entirely in your browser and never transmitted</p>
+      <p>Your file is processed entirely on your {$isTauri ? 'computer' : 'browser'} and never transmitted</p>
     </div>
 
-    <!-- Desktop app note -->
+    <!-- Desktop app note (web only) -->
+    {#if !$isTauri}
     <div class="text-center">
       <p class="text-xs text-text-tertiary">
         Prefer offline?
@@ -67,5 +69,6 @@
         for Windows, macOS, and Linux.
       </p>
     </div>
+    {/if}
   </div>
 </section>
