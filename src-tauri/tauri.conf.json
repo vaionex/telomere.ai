@@ -41,6 +41,16 @@
   },
   "plugins": {
     "dialog": { "all": true },
-    "fs": { "scope": { "allow": ["**"] } }
+    "fs": {
+      "scope": {
+        "allow": [
+          { "path": "$HOME/**" },
+          { "path": "$DESKTOP/**" },
+          { "path": "$DOCUMENT/**" },
+          { "path": "$DOWNLOAD/**" },
+          { "path": "/tmp/**" }
+        ]
+      }
+    }
   }
 }

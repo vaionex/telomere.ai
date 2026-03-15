@@ -73,31 +73,7 @@
   ];
 </script>
 
-<svelte:head>
-  <title>Telomere AI — Decode Your DNA. Locally. For Free.</title>
-  <meta name="description" content="Free, open-source genetic analysis. Upload your 23andMe, AncestryDNA, or VCF data and get health, trait, and pharmacogenomic insights. 332 SNPs, 238 traits. 100% in your browser — your DNA never leaves your device." />
-  <meta property="og:title" content="Telomere AI — Decode Your DNA" />
-  <meta property="og:description" content="Free genetic analysis. 332 SNPs, 238 traits, pharmacogenomics, family comparison. Your DNA never leaves your browser." />
-  <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://telomere.ai" />
-  <meta property="og:image" content="https://telomere.ai/og-image.svg" />
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:image" content="https://telomere.ai/og-image.svg" />
-  <meta name="twitter:title" content="Telomere AI — Decode Your DNA" />
-  <meta name="twitter:description" content="Free, open-source genetic analysis. Upload 23andMe/AncestryDNA/VCF data. Health risks, traits, pharmacogenomics. Privacy-first." />
-  <link rel="canonical" href="https://telomere.ai" />
-  {@html `<script type="application/ld+json">${JSON.stringify({
-    "@context": "https://schema.org",
-    "@type": "WebApplication",
-    "name": "Telomere AI",
-    "url": "https://telomere.ai",
-    "description": "Free, open-source genetic analysis platform. Upload your 23andMe, AncestryDNA, or VCF data for health, trait, and pharmacogenomic insights.",
-    "applicationCategory": "HealthApplication",
-    "operatingSystem": "Web Browser",
-    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-    "creator": { "@type": "Organization", "name": "Vaionex Corporation", "url": "https://vaionex.com" }
-  })}</script>`}
-</svelte:head>
+<!-- SEO head is in the first svelte:head block above -->
 
 <!-- Hero -->
 <section class="relative min-h-screen flex items-center overflow-hidden">

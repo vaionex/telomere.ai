@@ -1,7 +1,5 @@
 <script>
-  export const ssr = false;
-  export const prerender = false;
-
+  let { children } = $props();
   import { goto } from '$app/navigation';
   import { page } from '$app/stores';
   import { onDestroy } from 'svelte';
@@ -204,9 +202,9 @@
   </aside>
 
   <main class="flex-1 min-w-0 py-4 sm:py-6">
-    <slot />
+    {@render children()}
   </main>
 </div>
 {:else}
-<slot />
+{@render children()}
 {/if}

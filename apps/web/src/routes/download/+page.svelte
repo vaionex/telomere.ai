@@ -4,33 +4,25 @@
     {
       name: 'Windows',
       icon: 'windows',
-      file: `Telomere.AI_${version}_x64-setup.exe`,
-      alt: `Telomere.AI_${version}_x64_en-US.msi`,
-      size: '~45 MB',
+      file: `Telomere-AI_${version}_x64-setup.exe`,
+      alt: `Telomere-AI_${version}_x64_en-US.msi`,
+      size: '~5 MB',
       req: 'Windows 10 or later',
       primary: true,
     },
     {
       name: 'macOS (Apple Silicon)',
       icon: 'apple',
-      file: `Telomere.AI_${version}_aarch64.dmg`,
-      size: '~42 MB',
+      file: `Telomere-AI_${version}_aarch64.dmg`,
+      size: '~5 MB',
       req: 'macOS 12 or later (M1/M2/M3)',
       primary: true,
     },
     {
-      name: 'macOS (Intel)',
-      icon: 'apple',
-      file: `Telomere.AI_${version}_x64.dmg`,
-      size: '~44 MB',
-      req: 'macOS 12 or later (Intel)',
-      primary: false,
-    },
-    {
       name: 'Linux (AppImage)',
       icon: 'linux',
-      file: `Telomere.AI_${version}_amd64.AppImage`,
-      size: '~48 MB',
+      file: `Telomere-AI_${version}_amd64.AppImage`,
+      size: '~78 MB',
       req: 'Ubuntu 20.04+, Fedora 36+',
       primary: true,
     },
@@ -38,8 +30,24 @@
       name: 'Linux (.deb)',
       icon: 'linux',
       file: `telomere-ai_${version}_amd64.deb`,
-      size: '~12 MB',
+      size: '~4 MB',
       req: 'Debian/Ubuntu',
+      primary: false,
+    },
+    {
+      name: 'Linux (.rpm)',
+      icon: 'linux',
+      file: `Telomere-AI-${version}-1.x86_64.rpm`,
+      size: '~5 MB',
+      req: 'Fedora/RHEL',
+      primary: false,
+    },
+    {
+      name: 'Windows (.msi)',
+      icon: 'windows',
+      file: `Telomere-AI_${version}_x64_en-US.msi`,
+      size: '~4 MB',
+      req: 'Windows 10 or later',
       primary: false,
     },
   ];
@@ -47,7 +55,7 @@
   const features = [
     { icon: '🔒', title: 'Zero Network Access', desc: 'The app never connects to the internet. Your genetic data stays on your machine — period.' },
     { icon: '⚡', title: 'Native Performance', desc: 'Built with Rust. Parses 600,000+ SNPs in under 2 seconds on modern hardware.' },
-    { icon: '🧬', title: '2,000+ Health Markers', desc: 'Curated database from ClinVar, SNPedia, and peer-reviewed GWAS studies.' },
+    { icon: '🧬', title: '378 Health Markers', desc: 'Curated database from ClinVar, SNPedia, and peer-reviewed GWAS studies.' },
     { icon: '📊', title: '6 Report Categories', desc: 'Health risks, longevity, nutrigenomics, pharmacogenomics, traits, and carrier status.' },
   ];
 </script>
@@ -62,7 +70,7 @@
   <div class="text-center mb-16">
     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full glass text-xs text-accent-cyan mb-6">
       <span class="w-2 h-2 rounded-full bg-accent-green animate-pulse"></span>
-      v1.0.0 • Open Source • Free Forever
+      v0.1.0 • Open Source • Free Forever
     </div>
     <h1 class="text-4xl sm:text-5xl font-bold mb-4">Download <span class="gradient-text">Telomere AI</span></h1>
     <p class="text-text-secondary text-lg max-w-2xl mx-auto">A native desktop app that analyzes your genetic data entirely offline. No accounts, no uploads, no tracking.</p>
