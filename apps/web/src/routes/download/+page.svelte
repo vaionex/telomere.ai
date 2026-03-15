@@ -116,6 +116,45 @@
     </div>
   </details>
 
+  <!-- Installation Notes -->
+  <div class="mb-16">
+    <h2 class="text-2xl font-bold text-center mb-8">Installation Notes</h2>
+    <div class="grid gap-4">
+      <div class="card">
+        <h3 class="font-semibold mb-2 flex items-center gap-2">
+          <svg class="w-5 h-5 text-accent-cyan" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+          macOS
+        </h3>
+        <p class="text-text-secondary text-sm mb-2">Telomere AI is not notarized by Apple. macOS Gatekeeper will block it by default.</p>
+        <ol class="text-text-secondary text-sm space-y-1 list-decimal list-inside">
+          <li>Open the .dmg and drag Telomere AI to Applications</li>
+          <li>When blocked, go to <strong class="text-text-primary">System Settings → Privacy & Security</strong></li>
+          <li>Scroll down and click <strong class="text-text-primary">"Open Anyway"</strong> next to the Telomere AI message</li>
+          <li>Alternatively, right-click the app → <strong class="text-text-primary">Open</strong> → click Open in the dialog</li>
+        </ol>
+      </div>
+      <div class="card">
+        <h3 class="font-semibold mb-2 flex items-center gap-2">
+          <svg class="w-5 h-5 text-accent-cyan" viewBox="0 0 24 24" fill="currentColor"><path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.9-1.801"/></svg>
+          Windows
+        </h3>
+        <p class="text-text-secondary text-sm mb-2">Windows SmartScreen may show a warning for unsigned apps.</p>
+        <ol class="text-text-secondary text-sm space-y-1 list-decimal list-inside">
+          <li>Click <strong class="text-text-primary">"More info"</strong> on the SmartScreen popup</li>
+          <li>Click <strong class="text-text-primary">"Run anyway"</strong></li>
+        </ol>
+      </div>
+      <div class="card">
+        <h3 class="font-semibold mb-2 flex items-center gap-2">
+          <svg class="w-5 h-5 text-accent-cyan" viewBox="0 0 24 24" fill="currentColor"><path d="M12.504 0c-.155 0-.311.001-.465.003-.653.014-1.304.079-1.948.227-1.24.287-2.14.917-2.74 1.717C6.75 2.747 6.39 3.737 6.2 4.807c-.13.748-.14 1.535-.06 2.337H4.56c-.53 0-.96.43-.96.96v12.8c0 .53.43.96.96.96h14.88c.53 0 .96-.43.96-.96V8.104c0-.53-.43-.96-.96-.96h-1.67c.08-.802.07-1.589-.06-2.337-.19-1.07-.55-2.06-1.15-2.86-.6-.8-1.5-1.43-2.74-1.717A9.14 9.14 0 0012.504 0z"/></svg>
+          Linux
+        </h3>
+        <p class="text-text-secondary text-sm">AppImage: make executable with <code class="text-accent-cyan bg-white/5 px-1.5 py-0.5 rounded text-xs">chmod +x Telomere-AI_*.AppImage</code> then double-click or run from terminal.</p>
+      </div>
+      <p class="text-text-tertiary text-xs text-center">Telomere AI is open source — you can <a href="https://github.com/vaionex/telomere.ai" class="text-accent-blue hover:underline">audit the code</a> or build from source if you prefer.</p>
+    </div>
+  </div>
+
   <!-- Why Desktop -->
   <div class="mb-16">
     <h2 class="text-2xl font-bold text-center mb-8">Why a Desktop App?</h2>
