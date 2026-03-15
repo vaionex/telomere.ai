@@ -2,7 +2,7 @@ mod parser;
 mod snp_database;
 mod analyzer;
 
-pub fn run() {
+pub fn run() -> Result<(), Box<dyn std::error::Error>> {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
@@ -13,6 +13,6 @@ pub fn run() {
             analyzer::get_snp_detail,
             analyzer::search_snps,
         ])
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .run(tauri::generate_context!())?;
+    Ok(())
 }
